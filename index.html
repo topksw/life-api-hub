@@ -71,6 +71,10 @@ details.t div{white-space:pre-wrap;margin-top:4px;color:#344054}
 .legend span{display:inline-flex;align-items:center;gap:4px;margin-right:12px;font-size:12px}
 .legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
 a{color:var(--pri)}
+.msg{padding:9px 12px;border-radius:12px;margin:6px 0;max-width:88%;white-space:pre-wrap;font-size:14px}
+.msg.u{background:var(--pri);color:#fff;margin-left:auto}
+.msg.a{background:#f1f4fb}
+.msg small{display:block;color:var(--sub);margin-top:4px;font-size:11px}
 </style>
 </head>
 <body>
@@ -183,6 +187,17 @@ a{color:var(--pri)}
         <div class="row"><select id="busarea"></select></div>
         <div id="icnb"></div>
       </div>
+    </div>
+  </section>
+
+  <section id="v-ai" class="hide">
+    <div class="card">
+      <span class="tag">AI 비서</span><h3>허브 데이터로 답해주는 AI 비서</h3>
+      <div class="muted" id="aiwhere" style="margin-bottom:8px"></div>
+      <div id="chat" style="min-height:120px;max-height:460px;overflow:auto;margin-bottom:10px"></div>
+      <div class="row" id="aichips"></div>
+      <div class="row"><input id="aiq" placeholder="예: 오늘 우산 필요해? / 게보린 먹어도 돼? / 북한산 가는 법" style="flex:1;min-width:240px" maxlength="200"><button class="b" id="aigo">물어보기</button></div>
+      <div class="muted">OpenRouter 무료 모델이 허브 API 데이터를 읽고 답해요. 느리거나 가끔 실패할 수 있고, 약·건강 답변은 참고용이에요. 분당 6회, 하루 300개까지 질문할 수 있어요.</div>
     </div>
   </section>
 
@@ -457,8 +472,28 @@ function renderCatalog() {
   $('#catBox').innerHTML = h;
 }
 
+// ---------- AI 비서 ----------
+const AIGW = 'https://n8n.aitestbed.kr/webhook/apihub-ai';
+const AIQ = ['오늘 우산 챙겨야 해?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천'];
+function addMsg(cls, text, small) { const c = $('#chat'); const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; if (small) { const sm = document.createElement('small'); sm.textContent = small; d.appendChild(sm); } c.appendChild(d); c.scrollTop = c.scrollHeight; return d; }
+async function askAI(q) {
+  q = (q || $('#aiq').value).trim(); if (!q) return; $('#aiq').value = ''; $('#aigo').disabled = true; addMsg('u', q);
+  const wait = addMsg('a', '데이터를 찾아보는 중… (5~10초)');
+  try {
+    const u = AIGW + '?q=' + encodeURIComponent(q) + '&lat=' + pos.lat + '&lon=' + pos.lon + '&name=' + encodeURIComponent(pos.name);
+    const r = await fetch(u); const j = await r.json(); wait.remove();
+    if (j.ok) addMsg('a', j.answer, (j.used && j.used.length ? '사용한 데이터: ' + j.used.join(', ') + ' · ' : '') + (j.model || '').replace(':free', ''));
+    else addMsg('a', j.error || 'AI 비서가 답하지 못했어요');
+  } catch (e) { wait.remove(); addMsg('a', '연결에 실패했어요: ' + e.message); }
+  $('#aigo').disabled = false;
+}
+function initAI() {
+  $('#aichips').innerHTML = AIQ.map(q => '<span class="chip" onclick="askAI(\'' + q + '\')">' + esc(q) + '</span>').join(' ');
+  $('#aigo').onclick = () => askAI(); $('#aiq').onkeydown = e => { if (e.key === 'Enter') askAI(); };
+}
+
 // ---------- shell ----------
-const TABS = [['today', '오늘'], ['map', '지도'], ['route', '길찾기'], ['health', '약·건강'], ['trip', '여행·등산'], ['air', '공항'], ['cat', '카탈로그'], ['play', '플레이그라운드']];
+const TABS = [['today', '오늘'], ['map', '지도'], ['route', '길찾기'], ['health', '약·건강'], ['trip', '여행·등산'], ['air', '공항'], ['ai', 'AI 비서'], ['cat', '카탈로그'], ['play', '플레이그라운드']];
 const LOADED = {};
 function show(v) {
   view = v;
@@ -472,6 +507,7 @@ function refresh() {
   else if (view === 'health') { loadPharm(); if (!LOADED.health) { LOADED.health = 1; searchDrug(); searchFood(); } }
   else if (view === 'trip') { loadTrip(); if (!LOADED.trip) { LOADED.trip = 1; searchMt(); } }
   else if (view === 'air') loadAir();
+  else if (view === 'ai') $('#aiwhere').textContent = '기준 위치: ' + pos.name + ' (위치가 필요한 질문에 사용돼요)';
   else if (view === 'route' && RMAP) setTimeout(() => RMAP.invalidateSize(), 50);
 }
 (async function init() {
@@ -491,7 +527,7 @@ function refresh() {
   $('#mtgo').onclick = searchMt; $('#mtq').onkeydown = e => { if (e.key === 'Enter') searchMt(); };
   $('#apsel').innerHTML = AIRPORTS.map(a => '<option value="' + a[0] + '">' + a[1] + '</option>').join(''); $('#apsel').value = 'GMP'; $('#apsel').onchange = loadKac;
   $('#busarea').innerHTML = AREAS.map(a => '<option value="' + a[0] + '">' + a[1] + '</option>').join(''); $('#busarea').onchange = loadBus;
-  renderLayerChips(); renderTTypes();
+  renderLayerChips(); renderTTypes(); initAI();
   $('#run').onclick = runPlay;
   $('#copyUrl').onclick = () => { const u = new URL(GW); u.searchParams.set('api', $('#apiSel').value); Object.entries(formParams()).forEach(([k, v]) => u.searchParams.set(k, v)); navigator.clipboard.writeText(u.toString()).then(() => $('#status').textContent = '요청 URL을 복사했어요', () => $('#status').textContent = u.toString()); };
   show('today');
