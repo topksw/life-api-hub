@@ -196,7 +196,7 @@ a{color:var(--pri)}
       <div class="muted" id="aiwhere" style="margin-bottom:8px"></div>
       <div id="chat" style="min-height:120px;max-height:460px;overflow:auto;margin-bottom:10px"></div>
       <div class="row" id="aichips"></div>
-      <div class="row"><input id="aiq" placeholder="예: 오늘 우산 필요해? / 게보린 먹어도 돼? / 북한산 가는 법" style="flex:1;min-width:240px" maxlength="200"><button class="b" id="aigo">물어보기</button></div>
+      <div class="row"><input id="aiq" placeholder="예: 오늘 우산 필요해? / 서울역에서 강남역 가는 법 / 게보린 먹어도 돼?" style="flex:1;min-width:240px" maxlength="200"><button class="b" id="aigo">물어보기</button></div>
       <div class="muted">OpenRouter 무료 모델이 허브 API 데이터를 읽고 답해요. 느리거나 가끔 실패할 수 있고, 약·건강 답변은 참고용이에요. 분당 6회, 하루 300개까지 질문할 수 있어요.</div>
     </div>
   </section>
@@ -280,7 +280,9 @@ async function resolvePlace(text, fallbackToPos) {
   const t = (text || '').trim();
   if (!t) return fallbackToPos ? {lat: +pos.lat, lon: +pos.lon, name: pos.name} : null;
   const f = favs.find(x => x.n === t); if (f) return {lat: f.lat, lon: f.lon, name: f.n};
-  const g = await geocode(t); return g[0] ? {lat: g[0].lat, lon: g[0].lon, name: g[0].name} : null;
+  const vs = [t, t.replace(/인천공항/, '인천국제공항').replace(/제?(\d)\s*터미널/, '제$1여객터미널'), t.replace(/\s+/g, '').slice(2), t.split(/\s+/)[0]].filter((v, i, ar) => v && v.length >= 2 && ar.indexOf(v) === i).slice(0, 4);
+  for (let i = 0; i < vs.length; i++) { if (i) await new Promise(r => setTimeout(r, 1100)); const g = await geocode(vs[i]); if (g[0]) return {lat: g[0].lat, lon: g[0].lon, name: g[0].name}; }
+  return null;
 }
 
 // ---------- maps ----------
@@ -310,9 +312,9 @@ function toggleLayer(k) { layerOn[k] = !layerOn[k]; renderLayerChips(); loadMap(
 // ---------- route ----------
 let RMAP = null, rLayer = null, ROUTES = [];
 const legName = s => s.trafficType === 1 ? (s.lane?.[0]?.name || '지하철') : s.trafficType === 2 ? ((s.lane?.[0]?.busNo || '버스') + '번') : '도보';
-async function doRoute() {
+async function doRoute(pre) {
   $('#rstat').textContent = '장소 확인 중…'; $('#rlist').innerHTML = '';
-  let a, b; try { a = await resolvePlace($('#from').value, true); b = await resolvePlace($('#to').value, false); } catch (e) { $('#rstat').innerHTML = fail('장소 검색 실패: ' + e.message); return; }
+  let a, b; if (pre) { a = pre.a; b = pre.b; } else { try { a = await resolvePlace($('#from').value, true); b = await resolvePlace($('#to').value, false); } catch (e) { $('#rstat').innerHTML = fail('장소 검색 실패: ' + e.message); return; } }
   if (!b) { $('#rstat').innerHTML = fail('도착지를 찾지 못했어요'); return; }
   if (!a) { $('#rstat').innerHTML = fail('출발지를 찾지 못했어요'); return; }
   $('#rstat').textContent = a.name + ' → ' + b.name + ' 경로 탐색 중…';
@@ -474,7 +476,7 @@ function renderCatalog() {
 
 // ---------- AI 비서 ----------
 const AIGW = 'https://n8n.aitestbed.kr/webhook/apihub-ai';
-const AIQ = ['오늘 우산 챙겨야 해?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천'];
+const AIQ = ['오늘 우산 챙겨야 해?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천', '서울역에서 강남역 가는 법'];
 function addMsg(cls, text, small) { const c = $('#chat'); const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; if (small) { const sm = document.createElement('small'); sm.textContent = small; d.appendChild(sm); } c.appendChild(d); c.scrollTop = c.scrollHeight; return d; }
 async function askAI(q) {
   q = (q || $('#aiq').value).trim(); if (!q) return; $('#aiq').value = ''; $('#aigo').disabled = true; addMsg('u', q);
@@ -482,7 +484,7 @@ async function askAI(q) {
   try {
     const u = AIGW + '?q=' + encodeURIComponent(q) + '&lat=' + pos.lat + '&lon=' + pos.lon + '&name=' + encodeURIComponent(pos.name);
     const r = await fetch(u); const j = await r.json(); wait.remove();
-    if (j.ok) addMsg('a', j.answer, (j.used && j.used.length ? '사용한 데이터: ' + j.used.join(', ') + ' · ' : '') + (j.model || '').replace(':free', ''));
+    if (j.ok) { const m = addMsg('a', j.answer, (j.used && j.used.length ? '사용한 데이터: ' + j.used.join(', ') + ' · ' : '') + (j.model || '').replace(':free', '')); if (j.route) { const bt = document.createElement('button'); bt.className = 'b g'; bt.style.marginTop = '8px'; bt.textContent = '길찾기 탭에서 지도로 보기'; bt.onclick = () => { show('route'); $('#from').value = j.route.from; $('#to').value = j.route.to; doRoute(j.route.a ? {a: j.route.a, b: j.route.b} : undefined); }; m.appendChild(bt); } }
     else addMsg('a', j.error || 'AI 비서가 답하지 못했어요');
   } catch (e) { wait.remove(); addMsg('a', '연결에 실패했어요: ' + e.message); }
   $('#aigo').disabled = false;
@@ -520,7 +522,7 @@ function refresh() {
   $('#qgo').onclick = doQ; $('#q').onkeydown = e => { if (e.key === 'Enter') doQ(); };
   $('#geo').onclick = () => navigator.geolocation.getCurrentPosition(p => setPos({lat: p.coords.latitude, lon: p.coords.longitude, name: '내 위치'}), () => alert('위치 권한이 필요해요. 지역 검색이나 지도 클릭으로 지정해도 돼요.'));
   $('#mrad').onchange = loadMap; $('#prad').onchange = loadPharm; $('#trad').onchange = loadTrip;
-  $('#rgo').onclick = doRoute; $('#to').onkeydown = $('#from').onkeydown = e => { if (e.key === 'Enter') doRoute(); };
+  $('#rgo').onclick = () => doRoute(); $('#to').onkeydown = $('#from').onkeydown = e => { if (e.key === 'Enter') doRoute(); };
   $('#swap').onclick = () => { const a = $('#from').value; $('#from').value = $('#to').value; $('#to').value = a; };
   $('#druggo').onclick = searchDrug; $('#drugq').onkeydown = e => { if (e.key === 'Enter') searchDrug(); };
   $('#foodgo').onclick = searchFood; $('#foodq').onkeydown = e => { if (e.key === 'Enter') searchFood(); };
