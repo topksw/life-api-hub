@@ -190,6 +190,43 @@ a{color:var(--pri)}
     </div>
   </section>
 
+  <section id="v-safety" class="hide">
+    <div class="card" style="margin-bottom:12px">
+      <span class="tag">안전·상권·법령</span><h3>우리 동네 상권 (서울)</h3>
+      <div class="row">
+        <select id="bizcode"></select>
+        <input id="bizdong" placeholder="행정동 (예: 역삼, 성수) - 비우면 매출 상위 동" style="min-width:260px">
+        <button class="b" id="bizgo">조회</button>
+        <span class="muted" id="bizmonth"></span>
+      </div>
+      <div id="bizres"></div>
+      <div class="muted">BC카드 가맹점 데이터(서울만, 약 2개월 전 기준). 지수는 100 안팎이 평균 수준이에요.</div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <span class="tag">안전·상권·법령</span><h3>동네 CCTV</h3>
+        <div class="row"><input id="cctvq" placeholder="동네·주소 (예: 서울특별시 중구 신당동)" value="서울특별시 중구 신당동" style="flex:1;min-width:200px"><button class="b" id="cctvgo">검색</button></div>
+        <div id="cctvres"></div>
+      </div>
+      <div class="card">
+        <span class="tag">안전·상권·법령</span><h3>소방 현황 (화재·구조·구급상담)</h3>
+        <div class="row"><select id="firekind"><option value="fire_incident">화재</option><option value="rescue_incident">구조</option><option value="ems_consult">구급상담</option></select><input id="fireq" placeholder="지역·키워드 (예: 강남, 아파트)" style="flex:1;min-width:140px"><button class="b" id="firego">조회</button></div>
+        <div id="fireres"></div>
+        <div class="muted">소방청 데이터, 약 2개월 전까지 반영돼요.</div>
+      </div>
+      <div class="card">
+        <span class="tag">안전·상권·법령</span><h3>법령용어 검색</h3>
+        <div class="row"><input id="termq" placeholder="법령용어 (예: 계약, 임대차)" value="계약" style="flex:1;min-width:160px"><button class="b" id="termgo">검색</button></div>
+        <div id="termres"></div>
+      </div>
+      <div class="card">
+        <span class="tag">안전·상권·법령</span><h3>대한민국 헌법 개정본</h3>
+        <div id="constres"><span class="d">불러오는 중…</span></div>
+        <div class="muted">헌법재판소 자료실의 헌법 1~10호 개정본이에요. 파일은 한글(hwp)이에요.</div>
+      </div>
+    </div>
+  </section>
+
   <section id="v-ai" class="hide">
     <div class="card">
       <span class="tag">AI 비서</span><h3>허브 데이터로 답해주는 AI 비서</h3>
@@ -474,6 +511,64 @@ function renderCatalog() {
   $('#catBox').innerHTML = h;
 }
 
+// ---------- 안전·상권·법령 ----------
+const UPJONG = [['011','커피-음료'],['017','편의점'],['002','한식음식점'],['003','중식음식점'],['004','일식음식점'],['007','양식음식점'],['008','패스트푸드점'],['009','치킨전문점'],['010','분식전문점'],['006','제과점업'],['016','슈퍼마켓'],['025','아이스크림'],['001','숙박업'],['030','일반의류'],['041','가구'],['047','문구'],['052','의약품'],['084','일반병원'],['085','치과의원'],['086','한의원'],['087','공연시설 운영업'],['089','스포츠클럽'],['090','당구장'],['091','골프장'],['092','운동시설'],['093','노래방'],['094','PC방'],['096','미용실'],['097','피부관리실'],['098','네일숍']];
+const won = n => { n = +n; if (!n) return '-'; if (n >= 1e8) return (n / 1e8).toFixed(1) + '억원'; if (n >= 1e4) return Math.round(n / 1e4).toLocaleString() + '만원'; return n.toLocaleString() + '원'; };
+const fmtDt = s => { s = String(s || '').trim(); return s.length >= 12 ? s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6, 8) + ' ' + s.slice(8, 10) + ':' + s.slice(10, 12) : s.length >= 8 ? s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6, 8) : s; };
+const IDX = ['밀집도', '구매력', '안정성', '성장성', '집객력'];
+async function loadBiz() {
+  const code = $('#bizcode').value, dong = $('#bizdong').value.trim(); $('#bizres').innerHTML = '<span class="d">조회 중…</span>';
+  const base = {alstpbuzno: code}; if (dong) base.dong = dong;
+  const [a, b, c] = await Promise.all(['bc_sales', 'bc_index', 'bc_history'].map(api => gw(api, base).catch(() => ({ok: false}))));
+  if (!a.ok) return $('#bizres').innerHTML = fail(errText(a));
+  const rows = (a.data && a.data.content) || []; $('#bizmonth').textContent = a.data && a.data['기준월'] ? '기준월 ' + a.data['기준월'] : '';
+  if (!rows.length) return $('#bizres').innerHTML = '<div class="d">조건에 맞는 동이 없어요. 동 이름은 "성수", "역삼"처럼 짧게 입력해 보세요.</div>';
+  if (!dong) {
+    const mx = Math.max(...rows.map(x => x['카드매출금액'] || 0), 1);
+    return $('#bizres').innerHTML = '<h4 style="margin:8px 0">' + esc(a.data['업종']) + ' 카드매출 상위 동 TOP 10</h4>' + rows.slice(0, 10).map((x, i) => '<div style="padding:5px 0"><div style="display:flex;justify-content:space-between"><span><b>' + (i + 1) + '. ' + esc(x['행정동']) + '</b></span><span><b>' + won(x['카드매출금액']) + '</b> <span class="muted">' + (+x['카드매출건수']).toLocaleString() + '건</span></span></div><div class="bar"><span style="width:' + Math.round((x['카드매출금액'] || 0) / mx * 100) + '%;background:var(--pri)"></span></div></div>').join('');
+  }
+  const idx = {}, his = {}; (((b.ok && b.data && b.data.content) || [])).forEach(x => idx[x['행정동']] = x); (((c.ok && c.data && c.data.content) || [])).forEach(x => his[x['행정동']] = x);
+  $('#bizres').innerHTML = '<div class="grid">' + rows.slice(0, 8).map(x => { const i = idx[x['행정동']], h = his[x['행정동']];
+    return '<div class="card" style="padding:10px"><h4>' + esc(x['행정동']) + ' · ' + esc(a.data['업종']) + '</h4><div class="kv"><span>카드매출 <b>' + won(x['카드매출금액']) + '</b></span><span><b>' + (+x['카드매출건수']).toLocaleString() + '</b>건</span>' + (h ? '<span>평균 업력 <b>' + h['평균업력'] + '년</b></span><span>가맹점 <b>' + h['가맹점수'] + '</b>곳</span>' : '') + '</div>' +
+      (i ? '<div style="margin-top:8px">' + IDX.map(k => '<div style="display:flex;align-items:center;gap:6px;font-size:12px"><span style="width:44px;color:var(--sub)">' + k + '</span><div class="bar" style="flex:1;margin:0"><span style="width:' + Math.min(100, (i[k] || 0) / 2) + '%;background:' + ((i[k] || 0) >= 100 ? '#16a34a' : '#f59e0b') + '"></span></div><b style="width:28px;text-align:right">' + (i[k] ?? '-') + '</b></div>').join('') + '</div>' : '<div class="muted">상권지수 데이터 없음</div>') + '</div>'; }).join('') + '</div>';
+}
+async function loadCctv() {
+  const q = $('#cctvq').value.trim(); if (!q) return; $('#cctvres').innerHTML = '<span class="d">검색 중…</span>';
+  const j = await gw('cctv_info', {addr: q, numOfRows: 30}); if (!j.ok) return $('#cctvres').innerHTML = fail(errText(j));
+  const rows = findRows(j.data); const tot = j.data && j.data.response && j.data.response.body && j.data.response.body.totalCount;
+  if (!rows.length) return $('#cctvres').innerHTML = '<div class="d">검색 결과가 없어요. 주소를 "서울특별시 중구 신당동"처럼 시·도부터 입력해 보세요.</div>';
+  $('#cctvres').innerHTML = '<div class="muted" style="margin-bottom:4px">총 ' + (+tot || rows.length).toLocaleString() + '대 중 ' + rows.length + '대 표시</div><div class="scroll" style="max-height:340px">' + rows.map(x => '<div style="padding:6px 8px;border-bottom:1px solid var(--line);font-size:13px"><b>' + esc(x.LCTN_ROAD_NM_ADDR || x.LCTN_LOTNO_ADDR) + '</b><div class="muted">' + esc(x.INSTL_PRPS_SE_NM || '') + ' · ' + esc(x.CAM_CNTOM || '1') + '대 · 설치 ' + esc(x.INSTL_YM || '-') + ' · ' + esc(x.MNG_INST_NM || '') + (x.MNG_INST_TELNO ? ' ' + esc(x.MNG_INST_TELNO) : '') + (x.WGS84_LAT ? ' · <a target="_blank" rel="noopener" href="' + gmap(x.WGS84_LAT, x.WGS84_LOT) + '">지도</a>' : '') + '</div></div>').join('') + '</div>';
+}
+async function loadFire() {
+  const api = $('#firekind').value, q = $('#fireq').value.trim(); $('#fireres').innerHTML = '<span class="d">조회 중… (최대 20초)</span>';
+  const j = await gw(api, {q, size: 15}); if (!j.ok) return $('#fireres').innerHTML = fail(errText(j));
+  const items = (j.data && j.data.items) || []; if (!items.length) return $('#fireres').innerHTML = '<div class="d">결과가 없어요</div>';
+  const line = x => api === 'fire_incident' ? '<b>' + fmtDt(x.rcptDt) + '</b> · ' + esc((x.ctpvNm || '') + ' ' + (x.sggNm || '')) + '<div class="muted">' + esc(x.fireTypeNm || '') + ' · ' + esc(x.fcltPlcSclsfNm || x.fcltPlcMclsfNm || '') + (x.igtnDmntSclsfNm ? ' · 원인: ' + esc(x.igtnDmntSclsfNm) : '') + ' · 사망 ' + (x.dthCnt || 0) + ' 부상 ' + (x.injpsnCnt || 0) + ' · ' + esc(x.frstnNm || '') + '</div>'
+    : api === 'rescue_incident' ? '<b>' + fmtDt(x.dclrYmd + x.dclrTm) + '</b> · ' + esc((x.ctpvNm || '') + ' ' + (x.sggNm || '') + ' ' + (x.emdNm || '')) + '<div class="muted">' + esc(x.acdntCsNm || '') + (x.prcsRsltSeNm ? ' (' + esc(x.prcsRsltSeNm) + ')' : '') + (x.acdntPlcDtlNm ? ' · ' + esc(x.acdntPlcDtlNm) : '') + ' · ' + esc(x.frstnNm || '') + '</div>'
+    : '<b>' + fmtDt(x.mdlcrDscsnBgngDt) + '</b> · ' + esc(x.ctpvNm || '') + '<div class="muted">' + esc(x.dclrDow || '') + ' · ' + esc(x.seasnNm || '') + (x.mainSymNm ? ' · ' + esc(x.mainSymNm) : '') + '</div>';
+  $('#fireres').innerHTML = '<div class="muted" style="margin-bottom:4px">검색 결과 ' + (+j.data.total).toLocaleString() + '건 중 최근 ' + items.length + '건</div><div class="scroll" style="max-height:340px">' + items.map(x => '<div style="padding:6px 8px;border-bottom:1px solid var(--line);font-size:13px">' + line(x) + '</div>').join('') + '</div>';
+}
+async function loadTerm() {
+  const q = $('#termq').value.trim(); if (!q) return; $('#termres').innerHTML = '<span class="d">검색 중…</span>';
+  const j = await gw('law_term', {query: q, numOfRows: 30}); if (!j.ok) return $('#termres').innerHTML = fail(errText(j));
+  const s = j.data && j.data.LsTrmSearch; let rows = s && s.lstrm ? (Array.isArray(s.lstrm) ? s.lstrm : [s.lstrm]) : [];
+  if (!rows.length) return $('#termres').innerHTML = '<div class="d">검색 결과가 없어요</div>';
+  $('#termres').innerHTML = '<div class="muted" style="margin-bottom:4px">총 ' + esc(s.totalCnt) + '개 중 ' + rows.length + '개</div><div class="scroll" style="max-height:300px">' + rows.map(x => '<div style="padding:5px 8px;border-bottom:1px solid var(--line);font-size:13px"><a target="_blank" rel="noopener" href="https://www.law.go.kr' + esc(String(x['법령용어상세검색'] || '').replace(/&amp;/g, '&')) + '">' + esc(x['법령용어명']) + '</a></div>').join('') + '</div>';
+}
+async function loadConst() {
+  const j = await gw('ccourt_list', {}); if (!j.ok) return $('#constres').innerHTML = fail(errText(j));
+  const rows = findRows(j.data);
+  $('#constres').innerHTML = rows.map(x => '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px"><span>' + esc(x.title) + ' <span class="muted">개정 ' + fmtDt(x.revDate) + '</span></span><button class="b g" style="padding:3px 8px;font-size:12px" onclick="constFile(this,\'' + esc(x.boardId) + '\')">파일 링크</button></div>').join('');
+}
+async function constFile(btn, id) { btn.disabled = true; btn.textContent = '…'; const j = await gw('ccourt_detail', {boardId: id}); const r = findRows(j.data).find(x => x.fileLink); if (r) btn.outerHTML = '<a target="_blank" rel="noopener" href="' + esc(r.fileLink) + '">' + esc(r.fileNm || '다운로드') + '</a>'; else btn.textContent = '없음'; }
+function initSafety() {
+  $('#bizcode').innerHTML = UPJONG.map(u => '<option value="' + u[0] + '">' + u[1] + '</option>').join('');
+  $('#bizgo').onclick = loadBiz; $('#bizdong').onkeydown = e => { if (e.key === 'Enter') loadBiz(); };
+  $('#cctvgo').onclick = loadCctv; $('#cctvq').onkeydown = e => { if (e.key === 'Enter') loadCctv(); };
+  $('#firego').onclick = loadFire; $('#fireq').onkeydown = e => { if (e.key === 'Enter') loadFire(); };
+  $('#termgo').onclick = loadTerm; $('#termq').onkeydown = e => { if (e.key === 'Enter') loadTerm(); };
+}
+
 // ---------- AI 비서 ----------
 const AIGW = 'https://n8n.aitestbed.kr/webhook/apihub-ai';
 const AIQ = ['오늘 우산 챙겨야 해?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천', '서울역에서 강남역 가는 법'];
@@ -495,7 +590,7 @@ function initAI() {
 }
 
 // ---------- shell ----------
-const TABS = [['today', '오늘'], ['map', '지도'], ['route', '길찾기'], ['health', '약·건강'], ['trip', '여행·등산'], ['air', '공항'], ['ai', 'AI 비서'], ['cat', '카탈로그'], ['play', '플레이그라운드']];
+const TABS = [['today', '오늘'], ['map', '지도'], ['route', '길찾기'], ['health', '약·건강'], ['trip', '여행·등산'], ['air', '공항'], ['safety', '안전·상권·법령'], ['ai', 'AI 비서'], ['cat', '카탈로그'], ['play', '플레이그라운드']];
 const LOADED = {};
 function show(v) {
   view = v;
@@ -509,6 +604,7 @@ function refresh() {
   else if (view === 'health') { loadPharm(); if (!LOADED.health) { LOADED.health = 1; searchDrug(); searchFood(); } }
   else if (view === 'trip') { loadTrip(); if (!LOADED.trip) { LOADED.trip = 1; searchMt(); } }
   else if (view === 'air') loadAir();
+  else if (view === 'safety') { if (!LOADED.safety) { LOADED.safety = 1; loadBiz(); loadFire(); loadTerm(); loadConst(); loadCctv(); } }
   else if (view === 'ai') $('#aiwhere').textContent = '기준 위치: ' + pos.name + ' (위치가 필요한 질문에 사용돼요)';
   else if (view === 'route' && RMAP) setTimeout(() => RMAP.invalidateSize(), 50);
 }
@@ -529,7 +625,7 @@ function refresh() {
   $('#mtgo').onclick = searchMt; $('#mtq').onkeydown = e => { if (e.key === 'Enter') searchMt(); };
   $('#apsel').innerHTML = AIRPORTS.map(a => '<option value="' + a[0] + '">' + a[1] + '</option>').join(''); $('#apsel').value = 'GMP'; $('#apsel').onchange = loadKac;
   $('#busarea').innerHTML = AREAS.map(a => '<option value="' + a[0] + '">' + a[1] + '</option>').join(''); $('#busarea').onchange = loadBus;
-  renderLayerChips(); renderTTypes(); initAI();
+  renderLayerChips(); renderTTypes(); initAI(); initSafety();
   $('#run').onclick = runPlay;
   $('#copyUrl').onclick = () => { const u = new URL(GW); u.searchParams.set('api', $('#apiSel').value); Object.entries(formParams()).forEach(([k, v]) => u.searchParams.set(k, v)); navigator.clipboard.writeText(u.toString()).then(() => $('#status').textContent = '요청 URL을 복사했어요', () => $('#status').textContent = u.toString()); };
   show('today');
