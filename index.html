@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>생활 API 허브 · 모두의 AI</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#1c2333;--sub:#667085;--line:#e4e8f0;--pri:#2f5bea;--pri2:#e8eefe;--ok:#12a150;--bad:#d92d20;--warn:#f79009}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.5}
+header{background:linear-gradient(135deg,#2f5bea,#6b8cff);color:#fff;padding:18px 16px 12px}
+.in{max-width:1100px;margin:0 auto}
+h1{margin:0;font-size:21px}
+header p{margin:2px 0 10px;opacity:.9;font-size:13px}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav button{border:0;background:rgba(255,255,255,.18);color:#fff;padding:7px 13px;border-radius:20px;font-size:14px;cursor:pointer}
+nav button.on{background:#fff;color:var(--pri);font-weight:700}
+.fav{background:#fff;border-bottom:1px solid var(--line);padding:8px 16px}
+.fav .in{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--line);background:#fff;border-radius:16px;padding:4px 10px;font-size:13px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.chip.on{background:var(--pri2);border-color:var(--pri);color:var(--pri);font-weight:600}
+.chip i{font-style:normal;color:var(--sub);font-size:12px}
+main{max-width:1100px;margin:0 auto;padding:14px 16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+select,input{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;max-width:100%}
+button.b{font:inherit;padding:7px 12px;border:1px solid var(--pri);border-radius:8px;background:var(--pri);color:#fff;cursor:pointer}
+button.b.g{background:#fff;color:var(--pri)}
+button.b:disabled{opacity:.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.card h3{margin:0 0 6px;font-size:15px}
+.card h4{margin:0 0 4px;font-size:14px}
+.d{color:var(--sub);font-size:13px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:var(--pri2);color:var(--pri);margin-bottom:6px}
+.big{font-size:36px;font-weight:700;line-height:1.1}
+.kv{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--sub);margin-top:6px}
+.kv b{color:var(--ink)}
+.strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
+.strip div{min-width:62px;text-align:center;font-size:12px;background:#f7f9fd;border-radius:10px;padding:6px}
+.strip img{width:36px;height:36px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+th{background:#f7f9fd;position:sticky;top:0;white-space:nowrap}
+.scroll{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+td img{height:48px;border-radius:6px}
+pre{background:#0f172a;color:#d1e0ff;padding:12px;border-radius:10px;overflow:auto;max-height:420px;font-size:12px}
+.form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:10px 0}
+.form label{font-size:12px;color:var(--sub);display:block}
+.form input{width:100%}
+.req{color:var(--bad)}
+.st{font-size:13px;margin:8px 0}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.muted{color:var(--sub);font-size:12px}
+.aqi1{color:#12a150}.aqi2{color:#65a30d}.aqi3{color:#f79009}.aqi4{color:#ea580c}.aqi5{color:#d92d20}
+footer{max-width:1100px;margin:0 auto;padding:0 16px 28px;color:var(--sub);font-size:12px}
+.hide{display:none!important}
+#map,#rmap{height:480px;border-radius:14px;border:1px solid var(--line)}
+#rmap{height:360px;margin-bottom:12px}
+.bar{height:8px;background:#eef1f7;border-radius:4px;overflow:hidden;margin-top:6px}
+.bar span{display:block;height:100%}
+.leg{display:inline-block;font-size:12px;padding:2px 7px;border-radius:6px;color:#fff;margin:2px 3px 2px 0}
+.lg1{background:#2563eb}.lg2{background:#16a34a}.lg3{background:#98a2b3}
+.route{cursor:pointer}.route.on{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri2)}
+.thumb{width:100%;height:130px;object-fit:cover;border-radius:10px;background:#eef1f7;display:flex;align-items:center;justify-content:center;font-size:34px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:760px){.two{grid-template-columns:1fr}#map{height:380px}}
+details.t{margin-top:6px;font-size:13px}
+details.t summary{cursor:pointer;color:var(--pri)}
+details.t div{white-space:pre-wrap;margin-top:4px;color:#344054}
+.legend span{display:inline-flex;align-items:center;gap:4px;margin-right:12px;font-size:12px}
+.legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
+a{color:var(--pri)}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>생활 API 허브</h1>
+  <p>모두의 AI 실험실 디지털융합플랫폼 API를 n8n 게이트웨이로 모아서 보여줘요</p>
+  <nav id="nav"></nav>
+</div></header>
+
+<div class="fav"><div class="in">
+  <b style="font-size:13px">내 지역</b>
+  <span id="favs"></span>
+  <button class="chip" id="saveFav">⭐ 현재 위치 저장</button>
+  <input id="q" placeholder="지역·장소 검색 (예: 서울역, 해운대)" style="min-width:210px">
+  <button class="b g" id="qgo">검색</button>
+  <button class="b g" id="geo">내 위치</button>
+  <span class="muted" id="where"></span>
+  <div id="qres" style="width:100%"></div>
+</div></div>
+
+<main>
+  <section id="v-today">
+    <div class="grid" id="dash"></div>
+  </section>
+
+  <section id="v-map" class="hide">
+    <div class="row">
+      <label class="muted">반경
+        <select id="mrad"><option value="500">500m</option><option value="1000" selected>1km</option><option value="2000">2km</option><option value="3000">3km</option></select>
+      </label>
+      <span id="layers"></span>
+      <span class="muted">지도를 클릭하면 그 지점이 기준 위치가 돼요</span>
+    </div>
+    <div id="map"></div>
+    <div class="legend muted" style="margin-top:6px"><span><i style="background:#2f5bea"></i>기준 위치</span><span><i style="background:#16a34a"></i>약국</span><span><i style="background:#f59e0b"></i>관광지</span><span><i style="background:#ef4444"></i>음식점</span><span><i style="background:#8b5cf6"></i>숙박</span><span><i style="background:#06b6d4"></i>행사</span></div>
+    <div id="mstat" class="st muted"></div>
+  </section>
+
+  <section id="v-route" class="hide">
+    <div class="row">
+      <input id="from" list="favnames" placeholder="출발 (비우면 현재 위치)" style="min-width:200px">
+      <button class="b g" id="swap">⇄</button>
+      <input id="to" list="favnames" placeholder="도착 (예: 강남역)" style="min-width:200px">
+      <button class="b" id="rgo">길찾기</button>
+      <datalist id="favnames"></datalist>
+    </div>
+    <div id="rstat" class="st muted"></div>
+    <div class="two">
+      <div><div id="rmap"></div></div>
+      <div id="rlist"></div>
+    </div>
+  </section>
+
+  <section id="v-health" class="hide">
+    <div class="two">
+      <div class="card">
+        <span class="tag">약·건강</span><h3>약 검색 (e약은요)</h3>
+        <div class="row"><input id="drugq" placeholder="제품명 (예: 타이레놀, 게보린)" value="타이레놀"><button class="b" id="druggo">검색</button></div>
+        <div id="drugres"></div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <span class="tag">약·건강</span><h3>음식 영양성분 (100g 기준)</h3>
+          <div class="row"><input id="foodq" placeholder="음식 이름 (예: 김밥, 라면)" value="김밥"><button class="b" id="foodgo">검색</button></div>
+          <div id="foodres"></div>
+        </div>
+        <div class="card">
+          <span class="tag">약·건강</span><h3>주변 약국</h3>
+          <div class="row"><select id="prad"><option value="500">500m</option><option value="1000" selected>1km</option><option value="2000">2km</option><option value="3000">3km</option></select></div>
+          <div id="phres"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="v-trip" class="hide">
+    <div class="card" style="margin-bottom:12px">
+      <span class="tag">여행·맛집·등산</span><h3>내 주변 둘러보기</h3>
+      <div class="row">
+        <span id="ttypes"></span>
+        <select id="trad"><option value="1000">1km</option><option value="3000" selected>3km</option><option value="10000">10km</option><option value="20000">20km</option></select>
+      </div>
+      <div class="grid" id="tres"></div>
+    </div>
+    <div class="card">
+      <span class="tag">여행·맛집·등산</span><h3>산 정보</h3>
+      <div class="row"><input id="mtq" placeholder="산 이름 (예: 북한산, 한라산)" value="북한산"><button class="b" id="mtgo">검색</button></div>
+      <div class="grid" id="mtres"></div>
+    </div>
+  </section>
+
+  <section id="v-air" class="hide">
+    <div class="two">
+      <div class="card">
+        <span class="tag">길찾기·공항</span><h3>인천공항 출국장 혼잡도</h3>
+        <div class="row"><span id="terms"></span></div>
+        <div id="icnc"></div>
+      </div>
+      <div class="card">
+        <span class="tag">길찾기·공항</span><h3>인천공항 주차 현황</h3>
+        <div id="icnp"></div>
+      </div>
+      <div class="card">
+        <span class="tag">길찾기·공항</span><h3>전국 공항 주차장 혼잡도</h3>
+        <div class="row"><select id="apsel"></select></div>
+        <div id="kacp"></div>
+      </div>
+      <div class="card">
+        <span class="tag">길찾기·공항</span><h3>인천공항 리무진·버스</h3>
+        <div class="row"><select id="busarea"></select></div>
+        <div id="icnb"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="v-play" class="hide">
+    <div class="row">
+      <select id="apiSel" style="min-width:260px"></select>
+      <button class="b" id="run">호출</button>
+      <button class="b g" id="copyUrl">요청 URL 복사</button>
+    </div>
+    <div class="card">
+      <div id="apiDesc" class="d"></div>
+      <div class="form" id="form"></div>
+      <div class="st" id="status"></div>
+      <div id="result"></div>
+    </div>
+  </section>
+
+  <section id="v-cat" class="hide"><div id="catBox"></div></section>
+</main>
+<footer>데이터 출처: 디지털융합플랫폼(koreaconnect.kr) 제공 오픈API (OpenWeather, 기상청, ODsay, 인천국제공항공사, 한국공항공사, 식약처, 건강보험심사평가원, 한국관광공사, 부산시, 산림청, 고속도로 공공데이터포털), 지도 © OpenStreetMap contributors, 위성 © Esri, 장소 검색 Nominatim. 인증키는 서버(n8n)에만 있고 이 페이지에는 없어요. 내 지역은 이 브라우저에 자동 저장돼요.</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const GW = 'https://n8n.aitestbed.kr/webhook/apihub';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const clean = s => String(s ?? '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+const UNAVAILABLE = ['전국 주유소 평균가격', '시군구별 주유소 평균가격', '최근 7일 일일 평균가격', '지역별 최저가 TOP20', '반경 내 주유소 조회'];
+const gmap = (lat, lon, q) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q ? q : lat + ',' + lon);
+
+// ---------- state (주소창 # + localStorage 가능하면) ----------
+let pos = {lat: 37.5665, lon: 126.978, name: '서울'};
+let favs = [{n: '서울', lat: 37.5665, lon: 126.978}, {n: '부산', lat: 35.1796, lon: 129.0756}, {n: '제주', lat: 33.4996, lon: 126.5312}];
+let CAT = null, view = 'today';
+function loadState() {
+  let s = null;
+  try { const h = decodeURIComponent((location.hash || '').replace(/^#s=/, '')); if (h) s = JSON.parse(h); } catch (e) {}
+  if (!s) try { s = JSON.parse(localStorage.getItem('apihub') || 'null'); } catch (e) {}
+  if (s && s.f) favs = s.f; if (s && s.p) pos = s.p;
+}
+function saveState() {
+  const s = JSON.stringify({f: favs, p: pos});
+  try { localStorage.setItem('apihub', s); } catch (e) {}
+  try { location.hash = 's=' + encodeURIComponent(s); } catch (e) {}
+}
+function renderFavs() {
+  $('#favs').innerHTML = favs.map((f, i) => '<span class="chip' + (f.n === pos.name ? ' on' : '') + '" onclick="useFav(' + i + ')">' + esc(f.n) + ' <i onclick="event.stopPropagation();delFav(' + i + ')" title="삭제">✕</i></span>').join(' ');
+  $('#favnames').innerHTML = favs.map(f => '<option value="' + esc(f.n) + '">').join('');
+  $('#where').textContent = pos.name + ' (' + (+pos.lat).toFixed(3) + ', ' + (+pos.lon).toFixed(3) + ')';
+}
+function useFav(i) { setPos({lat: favs[i].lat, lon: favs[i].lon, name: favs[i].n}); }
+function delFav(i) { favs.splice(i, 1); saveState(); renderFavs(); }
+function setPos(p) { pos = p; saveState(); renderFavs(); refresh(); }
+
+// ---------- gateway ----------
+async function gw(api, params = {}) {
+  const u = new URL(GW); u.searchParams.set('api', api);
+  Object.entries(params).forEach(([k, v]) => { if (v !== '' && v != null) u.searchParams.set(k, v); });
+  const t = Date.now(); const r = await fetch(u); const j = await r.json(); j._ms = Date.now() - t; j._url = u.toString(); return j;
+}
+function findRows(o) {
+  let best = null;
+  (function walk(x, d) {
+    if (d > 6 || x == null || typeof x !== 'object') return;
+    if (Array.isArray(x)) { if (x.length && typeof x[0] === 'object' && (!best || x.length > best.length)) best = x; x.forEach(v => walk(v, d + 1)); return; }
+    if (x.item && !Array.isArray(x.item) && typeof x.item === 'object') { if (!best || best.length < 1) best = [x.item]; }
+    Object.values(x).forEach(v => walk(v, d + 1));
+  })(o, 0);
+  return best || [];
+}
+const fail = m => '<div class="bad">' + esc(m || '불러오기 실패') + '</div>';
+function errText(j) { return (j && (j.error || j.note)) || '불러오기 실패'; }
+
+// ---------- geocode (Nominatim) ----------
+async function geocode(q) {
+  const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&countrycodes=kr&accept-language=ko&q=' + encodeURIComponent(q));
+  return (await r.json()).map(x => ({name: x.display_name.split(',').slice(0, 2).join(' ').trim(), full: x.display_name, lat: +x.lat, lon: +x.lon}));
+}
+async function resolvePlace(text, fallbackToPos) {
+  const t = (text || '').trim();
+  if (!t) return fallbackToPos ? {lat: +pos.lat, lon: +pos.lon, name: pos.name} : null;
+  const f = favs.find(x => x.n === t); if (f) return {lat: f.lat, lon: f.lon, name: f.n};
+  const g = await geocode(t); return g[0] ? {lat: g[0].lat, lon: g[0].lon, name: g[0].name} : null;
+}
+
+// ---------- maps ----------
+function mkMap(el) { const m = L.map(el).setView([pos.lat, pos.lon], 14); const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '© OpenStreetMap contributors'}).addTo(m);
+  const sat = L.layerGroup([L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom: 19, attribution: 'Tiles © Esri'}), L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {maxZoom: 19})]);
+  L.control.layers({'일반 지도': osm, '위성+지명': sat}, null, {collapsed: false}).addTo(m); return m; }
+let MAP = null, meMarker = null, layerGroup = null;
+const LAYERS = [['ph', '약국', '#16a34a'], ['12', '관광지', '#f59e0b'], ['39', '음식점', '#ef4444'], ['32', '숙박', '#8b5cf6'], ['15', '행사', '#06b6d4']];
+const layerOn = {ph: true, '12': true, '39': false, '32': false, '15': false};
+function dot(lat, lon, color, html) { return L.circleMarker([lat, lon], {radius: 7, color: '#fff', weight: 2, fillColor: color, fillOpacity: .95}).bindPopup(html); }
+async function loadMap() {
+  if (!MAP) { MAP = mkMap('map'); layerGroup = L.layerGroup().addTo(MAP); MAP.on('click', e => setPos({lat: e.latlng.lat, lon: e.latlng.lng, name: '지도 선택'})); }
+  setTimeout(() => MAP.invalidateSize(), 50);
+  MAP.setView([pos.lat, pos.lon], MAP.getZoom() || 14);
+  layerGroup.clearLayers();
+  if (meMarker) meMarker.remove();
+  meMarker = L.circleMarker([pos.lat, pos.lon], {radius: 9, color: '#fff', weight: 3, fillColor: '#2f5bea', fillOpacity: 1}).addTo(MAP).bindPopup('기준 위치: ' + esc(pos.name));
+  const rad = $('#mrad').value; let n = 0; $('#mstat').textContent = '불러오는 중…';
+  const jobs = [];
+  if (layerOn.ph) jobs.push(gw('pharmacy_near', {xPos: pos.lon, yPos: pos.lat, radius: rad, numOfRows: 40}).then(j => { if (!j.ok) return; findRows(j.data).forEach(x => { const lat = +x.YPos, lon = +x.XPos; if (!lat) return; n++; dot(lat, lon, '#16a34a', '<b>' + esc(x.yadmNm) + '</b><br>' + esc(x.addr) + '<br>' + esc(x.telno || '') + '<br>' + Math.round(x.distance) + 'm').addTo(layerGroup); }); }));
+  LAYERS.filter(l => l[0] !== 'ph' && layerOn[l[0]]).forEach(l => jobs.push(gw('tour_near', {mapX: pos.lon, mapY: pos.lat, radius: rad, contentTypeId: l[0], numOfRows: 40}).then(j => { if (!j.ok) return; findRows(j.data).forEach(x => { const lat = +x.mapy, lon = +x.mapx; if (!lat) return; n++; dot(lat, lon, l[2], '<b>' + esc(x.title) + '</b><br>' + esc(x.addr1) + (x.tel ? '<br>' + esc(x.tel) : '') + '<br>' + Math.round(x.dist) + 'm' + (x.firstimage ? '<br><img src="' + esc(x.firstimage.replace(/^http:/, 'https:')) + '" width="180">' : '')).addTo(layerGroup); }); })));
+  await Promise.allSettled(jobs); $('#mstat').textContent = n + '곳을 표시했어요 (반경 ' + rad + 'm)';
+}
+function renderLayerChips() { $('#layers').innerHTML = LAYERS.map(l => '<span class="chip' + (layerOn[l[0]] ? ' on' : '') + '" onclick="toggleLayer(\'' + l[0] + '\')"><span style="width:10px;height:10px;border-radius:50%;background:' + l[2] + ';display:inline-block"></span>' + l[1] + '</span>').join(' '); }
+function toggleLayer(k) { layerOn[k] = !layerOn[k]; renderLayerChips(); loadMap(); }
+
+// ---------- route ----------
+let RMAP = null, rLayer = null, ROUTES = [];
+const legName = s => s.trafficType === 1 ? (s.lane?.[0]?.name || '지하철') : s.trafficType === 2 ? ((s.lane?.[0]?.busNo || '버스') + '번') : '도보';
+async function doRoute() {
+  $('#rstat').textContent = '장소 확인 중…'; $('#rlist').innerHTML = '';
+  let a, b; try { a = await resolvePlace($('#from').value, true); b = await resolvePlace($('#to').value, false); } catch (e) { $('#rstat').innerHTML = fail('장소 검색 실패: ' + e.message); return; }
+  if (!b) { $('#rstat').innerHTML = fail('도착지를 찾지 못했어요'); return; }
+  if (!a) { $('#rstat').innerHTML = fail('출발지를 찾지 못했어요'); return; }
+  $('#rstat').textContent = a.name + ' → ' + b.name + ' 경로 탐색 중…';
+  const j = await gw('transit_route', {SX: a.lon, SY: a.lat, EX: b.lon, EY: b.lat});
+  const paths = j.ok && j.data && j.data.result && j.data.result.path;
+  if (!paths) { $('#rstat').innerHTML = fail(j.ok ? ((j.data && j.data.error && (j.data.error.msg || j.data.error.message)) || '경로가 없어요 (너무 가깝거나 대중교통이 없는 구간)') : errText(j)); return; }
+  ROUTES = paths.map(p => ({p, a, b}));
+  $('#rstat').textContent = a.name + ' → ' + b.name + ' · ' + paths.length + '개 경로 (ODsay)';
+  $('#rlist').innerHTML = paths.slice(0, 8).map((p, i) => { const inf = p.info;
+    const legs = p.subPath.filter(s => s.trafficType !== 3 || s.sectionTime >= 3).map(s => '<span class="leg lg' + s.trafficType + '">' + esc(legName(s)) + (s.trafficType !== 3 ? ' ' + s.sectionTime + '분' : ' ' + s.sectionTime + '분') + '</span>').join('');
+    return '<div class="card route" id="rt' + i + '" onclick="drawRoute(' + i + ')"><div><b style="font-size:20px">' + inf.totalTime + '분</b> <span class="d">· ' + (+inf.payment).toLocaleString() + '원 · 환승 ' + Math.max(0, (inf.busTransitCount || 0) + (inf.subwayTransitCount || 0) - 1) + '회 · 도보 ' + inf.totalWalk + 'm</span></div><div style="margin:6px 0">' + legs + '</div><div class="d">' + esc(inf.firstStartStation || '') + ' → ' + esc(inf.lastEndStation || '') + '</div></div>'; }).join('');
+  drawRoute(0);
+}
+function drawRoute(i) {
+  const r = ROUTES[i]; if (!r) return; if (!RMAP) { RMAP = mkMap('rmap'); rLayer = L.layerGroup().addTo(RMAP); } setTimeout(() => RMAP.invalidateSize(), 50);
+  document.querySelectorAll('.route').forEach(e => e.classList.remove('on')); const el = $('#rt' + i); if (el) el.classList.add('on');
+  rLayer.clearLayers(); const all = [[r.a.lat, r.a.lon]];
+  let last = [r.a.lat, r.a.lon];
+  r.p.subPath.forEach(s => {
+    const st = s.passStopList && s.passStopList.stations ? s.passStopList.stations.map(x => [+x.y, +x.x]) : [];
+    const color = s.trafficType === 1 ? '#2563eb' : s.trafficType === 2 ? '#16a34a' : '#98a2b3';
+    if (st.length) { L.polyline([last, st[0]], {color: '#98a2b3', weight: 3, dashArray: '4 6'}).addTo(rLayer); L.polyline(st, {color, weight: 6, opacity: .85}).addTo(rLayer); all.push(...st); last = st[st.length - 1];
+      L.circleMarker(st[0], {radius: 5, color: '#fff', weight: 2, fillColor: color, fillOpacity: 1}).addTo(rLayer).bindTooltip(esc(s.startName || ''));
+      L.circleMarker(st[st.length - 1], {radius: 5, color: '#fff', weight: 2, fillColor: color, fillOpacity: 1}).addTo(rLayer).bindTooltip(esc(s.endName || '')); }
+  });
+  L.polyline([last, [r.b.lat, r.b.lon]], {color: '#98a2b3', weight: 3, dashArray: '4 6'}).addTo(rLayer); all.push([r.b.lat, r.b.lon]);
+  L.marker([r.a.lat, r.a.lon]).addTo(rLayer).bindTooltip('출발: ' + esc(r.a.name), {permanent: true, direction: 'top'});
+  L.marker([r.b.lat, r.b.lon]).addTo(rLayer).bindTooltip('도착: ' + esc(r.b.name), {permanent: true, direction: 'top'});
+  RMAP.fitBounds(L.latLngBounds(all).pad(0.15));
+}
+
+// ---------- health ----------
+async function searchDrug() {
+  const q = $('#drugq').value.trim(); if (!q) return; $('#drugres').innerHTML = '<span class="d">검색 중…</span>';
+  const j = await gw('drug_info', {itemName: q, numOfRows: 8}); if (!j.ok) return $('#drugres').innerHTML = fail(errText(j));
+  const rows = findRows(j.data); if (!rows.length) return $('#drugres').innerHTML = '<div class="d">검색 결과가 없어요</div>';
+  const sec = (t, v) => v ? '<details class="t"><summary>' + t + '</summary><div>' + esc(clean(v)) + '</div></details>' : '';
+  $('#drugres').innerHTML = rows.map(x => '<div style="padding:8px 0;border-bottom:1px solid var(--line)"><h4>' + esc(x.itemName) + '</h4><div class="muted">' + esc(x.entpName) + '</div><div style="font-size:13px;margin-top:4px"><b>효능</b> ' + esc(clean(x.efcyQesitm)) + '</div>' + sec('복용법', x.useMethodQesitm) + sec('먼저 알아둘 점 (경고)', x.atpnWarnQesitm) + sec('주의사항', x.atpnQesitm) + sec('같이 먹으면 안 되는 약·음식', x.intrcQesitm) + sec('부작용', x.seQesitm) + sec('보관법', x.depositMethodQesitm) + '</div>').join('');
+}
+async function searchFood() {
+  const q = $('#foodq').value.trim(); if (!q) return; $('#foodres').innerHTML = '<span class="d">검색 중…</span>';
+  const j = await gw('food_nutrition', {FOOD_NM_KR: q, numOfRows: 12}); if (!j.ok) return $('#foodres').innerHTML = fail(errText(j));
+  const rows = findRows(j.data); if (!rows.length) return $('#foodres').innerHTML = '<div class="d">검색 결과가 없어요</div>';
+  const n = v => v === '' || v == null ? '-' : (+v).toString().replace(/(\.\d)\d+/, '$1');
+  $('#foodres').innerHTML = rows.map(x => '<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>' + esc(x.FOOD_NM_KR) + '</b> <span class="muted">' + esc(x.FOOD_CAT1_NM || x.DB_GRP_NM || '') + ' · ' + esc(x.SERVING_SIZE || '') + '</span></div><div class="kv"><span>열량 <b>' + n(x.AMT_NUM1) + 'kcal</b></span><span>탄수화물 <b>' + n(x.AMT_NUM6) + 'g</b></span><span>단백질 <b>' + n(x.AMT_NUM3) + 'g</b></span><span>지방 <b>' + n(x.AMT_NUM4) + 'g</b></span><span>당류 <b>' + n(x.AMT_NUM7) + 'g</b></span><span>나트륨 <b>' + n(x.AMT_NUM13) + 'mg</b></span></div></div>').join('');
+}
+async function loadPharm() {
+  $('#phres').innerHTML = '<span class="d">불러오는 중…</span>';
+  const j = await gw('pharmacy_near', {xPos: pos.lon, yPos: pos.lat, radius: $('#prad').value, numOfRows: 30}); if (!j.ok) return $('#phres').innerHTML = fail(errText(j));
+  const rows = findRows(j.data).sort((a, b) => a.distance - b.distance); if (!rows.length) return $('#phres').innerHTML = '<div class="d">반경 안에 약국이 없어요</div>';
+  $('#phres').innerHTML = rows.map(x => '<div style="padding:6px 0;border-bottom:1px solid var(--line)"><b>' + esc(x.yadmNm) + '</b> <span class="muted">' + Math.round(x.distance) + 'm</span><div class="muted">' + esc(x.addr) + (x.telno ? ' · <a href="tel:' + esc(x.telno) + '">' + esc(x.telno) + '</a>' : '') + ' · <a target="_blank" rel="noopener" href="' + gmap(x.YPos, x.XPos) + '">지도</a></div></div>').join('');
+}
+
+// ---------- trip ----------
+const TTYPES = [['', '전체'], ['12', '관광지'], ['39', '음식점'], ['32', '숙박'], ['15', '행사'], ['14', '문화시설'], ['28', '레포츠'], ['38', '쇼핑']]; let ttype = '39';
+const EMO = {12: '🏞️', 39: '🍽️', 32: '🛏️', 15: '🎪', 14: '🏛️', 28: '🚴', 38: '🛍️', 25: '🧭'};
+function renderTTypes() { $('#ttypes').innerHTML = TTYPES.map(t => '<span class="chip' + (ttype === t[0] ? ' on' : '') + '" onclick="ttype=\'' + t[0] + '\';renderTTypes();loadTrip()">' + t[1] + '</span>').join(' '); }
+async function loadTrip() {
+  $('#tres').innerHTML = '<span class="d">불러오는 중…</span>';
+  const j = await gw('tour_near', {mapX: pos.lon, mapY: pos.lat, radius: $('#trad').value, contentTypeId: ttype, numOfRows: 24});
+  if (!j.ok) return $('#tres').innerHTML = fail(errText(j)); const rows = findRows(j.data);
+  if (!rows.length) return $('#tres').innerHTML = '<div class="d">주변에 정보가 없어요</div>';
+  $('#tres').innerHTML = rows.map(x => '<div class="card" style="padding:10px">' + (x.firstimage ? '<img class="thumb" loading="lazy" src="' + esc(x.firstimage.replace(/^http:/, 'https:')) + '" onerror="this.outerHTML=\'<div class=thumb>' + (EMO[x.contenttypeid] || '📍') + '</div>\'">' : '<div class="thumb">' + (EMO[x.contenttypeid] || '📍') + '</div>') + '<h4 style="margin-top:8px">' + esc(x.title) + '</h4><div class="muted">' + esc(x.addr1) + '</div><div class="kv"><span><b>' + Math.round(x.dist) + 'm</b></span>' + (x.tel ? '<span>' + esc(x.tel) + '</span>' : '') + '<span><a target="_blank" rel="noopener" href="' + gmap(x.mapy, x.mapx, x.title) + '">지도</a></span></div></div>').join('');
+}
+async function searchMt() {
+  const q = $('#mtq').value.trim(); if (!q) return; $('#mtres').innerHTML = '<span class="d">검색 중…</span>';
+  const j = await gw('mt_info', {mntnNm: q, numOfRows: 4}); if (!j.ok) return $('#mtres').innerHTML = fail(errText(j));
+  const rows = findRows(j.data).filter(x => x.mntnnm); if (!rows.length) return $('#mtres').innerHTML = '<div class="d">검색 결과가 없어요</div>';
+  const sec = (t, v) => v && clean(v) ? '<details class="t"><summary>' + t + '</summary><div>' + esc(clean(v)) + '</div></details>' : '';
+  $('#mtres').innerHTML = rows.map((x, i) => '<div class="card"><h4>⛰️ ' + esc(x.mntnnm) + ' <span class="muted">' + esc(x.mntninfohght || '?') + 'm</span></h4><div class="muted">' + esc(clean(x.mntninfopoflc)) + '</div>' + (x.mntnsbttlinfo ? '<div style="font-size:13px;margin:4px 0"><i>' + esc(clean(x.mntnsbttlinfo)) + '</i></div>' : '') + sec('왜 명산일까', x.hndfmsmtnslctnrson) + sec('추천 코스', x.crcmrsghtnginfoetcdscrt) + sec('대중교통', x.pbtrninfodscrt) + sec('숙식·이용 문의', x.crcmrsghtnginfodscrt) + sec('산 소개', x.mntninfodtlinfocont) + '<div style="margin-top:8px"><button class="b g" onclick="mtMap(this,\'' + esc(x.mntnnm) + '\')">등산로 지도 링크</button></div></div>').join('');
+}
+async function mtMap(btn, nm) {
+  btn.disabled = true; btn.textContent = '찾는 중…'; const j = await gw('mt_trailloc', {mntnNm: nm, numOfRows: 3}); const r = findRows(j.data).find(x => x.mntninfourl);
+  if (r) btn.outerHTML = '<a target="_blank" rel="noopener" href="' + esc(r.mntninfourl) + '">산림청 등산로 지도 열기</a>'; else btn.textContent = '등산로 위치 정보가 없어요';
+}
+
+// ---------- airport ----------
+let term = 'P01';
+const TERMS = [['P01', '제1터미널'], ['P02', '제1 탑승동'], ['P03', '제2터미널']];
+const AIRPORTS = [['ICN', '전체'], ['GMP', '김포'], ['PUS', '김해'], ['CJU', '제주'], ['TAE', '대구'], ['CJJ', '청주'], ['KWJ', '광주'], ['RSU', '여수'], ['USN', '울산'], ['KPX', '포항경주'], ['MWX', '무안'], ['HIN', '사천'], ['KUV', '군산'], ['WJU', '원주'], ['YNY', '양양']];
+const AREAS = [[1, '서울'], [2, '경기'], [3, '인천'], [4, '강원'], [5, '충청'], [6, '경상'], [7, '지역 7']];
+const col = p => p >= 90 ? '#ef4444' : p >= 70 ? '#f59e0b' : '#16a34a';
+async function loadAir() {
+  $('#terms').innerHTML = TERMS.map(t => '<span class="chip' + (term === t[0] ? ' on' : '') + '" onclick="term=\'' + t[0] + '\';loadAir()">' + t[1] + '</span>').join(' ');
+  gw('icn_congestion', {terminalId: term, numOfRows: 30}).then(j => { if (!j.ok) return $('#icnc').innerHTML = fail(errText(j)); const r = findRows(j.data); if (!r.length) return $('#icnc').innerHTML = '<div class="d">데이터가 없어요</div>';
+    $('#icnc').innerHTML = r.map(x => { const w = +x.waitTime; const c = w < 10 ? '#16a34a' : w < 20 ? '#f59e0b' : '#ef4444'; return '<div style="padding:5px 0"><div style="display:flex;justify-content:space-between"><span><b>' + esc(x.gateId) + '</b></span><span><b style="color:' + c + '">' + w + '분</b> <span class="muted">· ' + esc(x.waitLength) + '명</span></span></div><div class="bar"><span style="width:' + Math.min(100, w * 3) + '%;background:' + c + '"></span></div></div>'; }).join('') + '<div class="muted">' + esc(String(r[0].occurtime || '').replace(/(\d{4})(\d\d)(\d\d)(\d\d)(\d\d).*/, '$1-$2-$3 $4:$5')) + ' 기준</div>'; }).catch(() => $('#icnc').innerHTML = fail());
+  gw('icn_parking', {numOfRows: 30}).then(j => { if (!j.ok) return $('#icnp').innerHTML = fail(errText(j)); const r = findRows(j.data);
+    $('#icnp').innerHTML = r.map(x => { const used = +x.parking, tot = +x.parkingarea, p = tot ? Math.round(used / tot * 100) : 0; return '<div style="padding:5px 0"><div style="display:flex;justify-content:space-between"><span>' + esc(x.floor) + '</span><span><b style="color:' + col(p) + '">' + p + '%</b> <span class="muted">' + used + '/' + tot + '</span></span></div><div class="bar"><span style="width:' + p + '%;background:' + col(p) + '"></span></div></div>'; }).join(''); }).catch(() => $('#icnp').innerHTML = fail());
+  loadKac(); loadBus();
+}
+async function loadKac() {
+  $('#kacp').innerHTML = '<span class="d">불러오는 중…</span>';
+  const j = await gw('airport_parking', {schAirportCode: $('#apsel').value, numOfRows: 40}); if (!j.ok) return $('#kacp').innerHTML = fail(errText(j)); const r = findRows(j.data);
+  $('#kacp').innerHTML = r.length ? r.map(x => { const p = Math.round(parseFloat(x.parkingCongestionDegree) || 0); return '<div style="padding:5px 0"><div style="display:flex;justify-content:space-between"><span><b>' + esc((x.airportKor || '').replace('국제공항', '').replace('공항', '')) + '</b> ' + esc(x.parkingAirportCodeName) + '</span><span><b style="color:' + col(p) + '">' + esc(x.parkingCongestion) + ' ' + p + '%</b> <span class="muted">' + x.parkingOccupiedSpace + '/' + x.parkingTotalSpace + '</span></span></div><div class="bar"><span style="width:' + Math.min(100, p) + '%;background:' + col(p) + '"></span></div></div>'; }).join('') : '<div class="d">데이터가 없어요</div>';
+}
+async function loadBus() {
+  $('#icnb').innerHTML = '<span class="d">불러오는 중…</span>';
+  const j = await gw('icn_bus', {area: $('#busarea').value, numOfRows: 60}); if (!j.ok) return $('#icnb').innerHTML = fail(errText(j)); const r = findRows(j.data);
+  $('#icnb').innerHTML = '<div class="scroll"><table><tr><th>노선</th><th>요금</th><th>첫차~막차</th><th>회사</th></tr>' + r.map(x => '<tr><td><b>' + esc(x.busnumber) + '</b><div class="muted">' + esc(x.busclass || '') + '</div></td><td>' + (+x.adultfare).toLocaleString() + '원</td><td>' + esc(x.toawfirst) + '~' + esc(x.toawlast) + '</td><td class="muted">' + esc(x.cpname || '') + '</td></tr>').join('') + '</table></div>';
+}
+
+// ---------- today ----------
+function widget(id, title, tag) { return '<div class="card" id="w-' + id + '"><span class="tag">' + tag + '</span><h3>' + title + '</h3><div class="body d">불러오는 중…</div></div>'; }
+function setW(id, html) { const b = $('#w-' + id + ' .body'); b.innerHTML = html; b.className = 'body'; }
+const AQI = ['', '좋음', '보통', '약간 나쁨', '나쁨', '매우 나쁨'];
+async function loadToday() {
+  $('#dash').innerHTML = widget('now', '현재 날씨 · ' + esc(pos.name), '날씨·대기') + widget('air', '대기질', '날씨·대기') + widget('fc', '앞으로 24시간', '날씨·대기') + widget('ph', '주변 약국 (1km)', '약·건강') + widget('icn', '인천공항 제1터미널 출국장', '길찾기·공항') + widget('gas', '고속도로 주유소 최저가 TOP5', '기름값');
+  const L0 = {lat: pos.lat, lon: pos.lon};
+  gw('weather_now', L0).then(j => { if (!j.ok) return setW('now', fail()); const d = j.data, w = d.weather[0];
+    setW('now', '<div style="display:flex;align-items:center;gap:10px"><img width="64" src="https://openweathermap.org/img/wn/' + w.icon + '@2x.png"><div><div class="big">' + Math.round(d.main.temp) + '°</div><div>' + esc(w.description) + '</div></div></div><div class="kv"><span>체감 <b>' + Math.round(d.main.feels_like) + '°</b></span><span>습도 <b>' + d.main.humidity + '%</b></span><span>바람 <b>' + d.wind.speed + 'm/s</b></span><span>구름 <b>' + (d.clouds?.all ?? '-') + '%</b></span></div>'); }).catch(() => setW('now', fail()));
+  gw('air_now', L0).then(j => { if (!j.ok) return setW('air', fail()); const e = j.data.list[0], a = e.main.aqi, c = e.components;
+    setW('air', '<div class="big aqi' + a + '">' + AQI[a] + '</div><div class="kv"><span>PM2.5 <b>' + c.pm2_5 + '</b></span><span>PM10 <b>' + c.pm10 + '</b></span><span>O₃ <b>' + c.o3 + '</b></span><span>NO₂ <b>' + c.no2 + '</b></span></div><div class="muted">OpenWeather 5단계 지수(한국 환경부 기준과 달라요)</div>'); }).catch(() => setW('air', fail()));
+  gw('weather_forecast', {...L0, cnt: 8}).then(j => { if (!j.ok) return setW('fc', fail());
+    setW('fc', '<div class="strip">' + j.data.list.map(x => { const t = new Date(x.dt * 1000); return '<div>' + t.getHours() + '시<br><img src="https://openweathermap.org/img/wn/' + x.weather[0].icon + '.png"><br><b>' + Math.round(x.main.temp) + '°</b><br><span class="muted">☔' + Math.round((x.pop || 0) * 100) + '%</span></div>'; }).join('') + '</div>'); }).catch(() => setW('fc', fail()));
+  gw('pharmacy_near', {xPos: pos.lon, yPos: pos.lat, radius: 1000, numOfRows: 5}).then(j => { if (!j.ok) return setW('ph', fail()); const r = findRows(j.data).sort((a, b) => a.distance - b.distance);
+    setW('ph', r.length ? r.map(x => '<div style="padding:4px 0;border-bottom:1px solid var(--line)"><b>' + esc(x.yadmNm) + '</b> <span class="muted">' + Math.round(x.distance) + 'm</span><div class="muted">' + esc(x.addr) + (x.telno ? ' · ' + esc(x.telno) : '') + '</div></div>').join('') : '근처 약국 정보가 없어요'); }).catch(() => setW('ph', fail()));
+  gw('icn_congestion', {numOfRows: 12}).then(j => { if (!j.ok) return setW('icn', fail()); const r = findRows(j.data);
+    setW('icn', r.length ? r.map(x => { const w = +x.waitTime; const c = w < 10 ? '#16a34a' : w < 20 ? '#f59e0b' : '#ef4444'; return '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:13px"><span>' + esc(x.gateId) + '</span><span><b style="color:' + c + '">' + w + '분</b> <span class="muted">' + esc(x.waitLength) + '명</span></span></div>'; }).join('') : '데이터가 없어요'); }).catch(() => setW('icn', fail()));
+  gw('highway_gas', {}).then(j => { if (!j.ok) return setW('gas', fail('불러오기 실패 (원본 API가 가끔 503이에요, 새로고침)')); const r = (j.data.list || []).map(x => ({n: x.serviceAreaName, r: x.routeName, p: parseInt(String(x.gasolinePrice).replace(/\D/g, ''))})).filter(x => x.p >= 1000 && x.p < 5000).sort((a, b) => a.p - b.p).slice(0, 5);
+    setW('gas', r.map(x => '<div style="padding:4px 0;border-bottom:1px solid var(--line)"><b>' + esc(x.n) + '</b> <span class="muted">' + esc(x.r) + '</span> <span style="float:right"><b>' + x.p.toLocaleString() + '원</b></span></div>').join('') + '<div class="muted">휘발유 기준, 고속도로 휴게소만 포함</div>'); }).catch(() => setW('gas', fail()));
+}
+
+// ---------- playground & catalog ----------
+function buildForm(a) {
+  $('#apiDesc').innerHTML = '<span class="tag">' + esc(CAT.groups[a.group]) + '</span> <b>' + esc(a.name) + '</b> · ' + esc(a.desc);
+  $('#form').innerHTML = a.params.map(p => '<div><label>' + esc(p.label) + ' <span class="muted">(' + esc(p.key) + ')</span>' + (p.required ? ' <span class="req">*</span>' : '') + '</label><input data-k="' + esc(p.key) + '" value="' + esc(p.default ?? '') + '"></div>').join('');
+}
+function formParams() { const o = {}; document.querySelectorAll('#form input').forEach(i => { if (i.value !== '') o[i.dataset.k] = i.value; }); return o; }
+function cell(v) { if (v == null) return ''; if (typeof v === 'object') return esc(JSON.stringify(v)).slice(0, 120); const s = String(v);
+  if (/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(s)) return '<img loading="lazy" src="' + esc(s) + '">'; if (/^https?:\/\//.test(s)) return '<a target="_blank" rel="noopener" href="' + esc(s) + '">링크</a>'; return esc(s.length > 140 ? s.slice(0, 140) + '…' : s); }
+function table(rows, maxCols = 9) {
+  const cols = []; rows.slice(0, 30).forEach(r => Object.keys(r).forEach(k => { if (!cols.includes(k) && r[k] !== '' && r[k] != null) cols.push(k); }));
+  const pri = c => /title|name|nm$|^nm|명|^addr/i.test(c) ? 0 : /tel|price|distance|time|url|img|image/i.test(c) ? 1 : 2; cols.sort((a, b) => pri(a) - pri(b));
+  const use = cols.slice(0, maxCols);
+  return '<div class="scroll"><table><thead><tr>' + use.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' + rows.slice(0, 200).map(r => '<tr>' + use.map(c => '<td>' + cell(r[c]) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div><div class="muted">' + rows.length + '행 중 ' + Math.min(rows.length, 200) + '행, 열 ' + use.length + '/' + cols.length + '개 표시</div>';
+}
+function renderResult(j) {
+  if (!j.ok) return '<div class="bad">실패: ' + esc(j.error || j.note || '알 수 없는 오류') + '</div>';
+  const rows = findRows(j.data); let h = rows.length ? table(rows) : '<pre>' + esc(JSON.stringify(j.data, null, 2)) + '</pre>';
+  return h + '<details style="margin-top:8px"><summary>원본 JSON 보기</summary><pre>' + esc(JSON.stringify(j.data, null, 2)) + '</pre></details>';
+}
+async function runPlay() {
+  const id = $('#apiSel').value; $('#run').disabled = true; $('#status').innerHTML = '호출 중…'; $('#result').innerHTML = '';
+  try { const j = await gw(id, formParams()); $('#status').innerHTML = (j.ok ? '<span class="ok">성공</span>' : '<span class="bad">실패</span>') + ' · ' + j._ms + 'ms' + (j.note ? ' · ' + esc(j.note) : ''); $('#result').innerHTML = renderResult(j); }
+  catch (e) { $('#status').innerHTML = '<span class="bad">게이트웨이 오류: ' + esc(e.message) + '</span>'; }
+  $('#run').disabled = false;
+}
+function openPlay(id) { show('play'); $('#apiSel').value = id; buildForm(CAT.apis.find(a => a.id === id)); $('#result').innerHTML = ''; $('#status').innerHTML = ''; window.scrollTo({top: 0}); }
+function renderCatalog() {
+  let h = '';
+  for (const [g, gname] of Object.entries(CAT.groups)) {
+    h += '<h2 style="font-size:16px;margin:18px 0 8px">' + esc(gname) + '</h2><div class="grid">';
+    CAT.apis.filter(a => a.group === g).forEach(a => { h += '<div class="card"><span class="tag">' + esc(gname) + '</span><h3>' + esc(a.name) + '</h3><div class="d">' + esc(a.desc) + '</div><div class="muted" style="margin:6px 0">' + a.params.map(p => esc(p.key) + (p.required ? '*' : '')).join(', ') + '</div><button class="b g" onclick="openPlay(\'' + a.id + '\')">써보기</button></div>'; });
+    if (g === 'gas') UNAVAILABLE.forEach(u => { h += '<div class="card" style="opacity:.7"><span class="tag" style="background:#fef0c7;color:#b54708">점검 필요</span><h3>' + esc(u) + '</h3><div class="d">오피넷 · 승인됐지만 게이트웨이 응답이 비어 있어요(플랫폼 쪽 문제로 보임).</div></div>'; });
+    h += '</div>';
+  }
+  $('#catBox').innerHTML = h;
+}
+
+// ---------- shell ----------
+const TABS = [['today', '오늘'], ['map', '지도'], ['route', '길찾기'], ['health', '약·건강'], ['trip', '여행·등산'], ['air', '공항'], ['cat', '카탈로그'], ['play', '플레이그라운드']];
+const LOADED = {};
+function show(v) {
+  view = v;
+  TABS.forEach(t => $('#v-' + t[0]).classList.toggle('hide', t[0] !== v));
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  refresh();
+}
+function refresh() {
+  if (view === 'today') loadToday();
+  else if (view === 'map') loadMap();
+  else if (view === 'health') { loadPharm(); if (!LOADED.health) { LOADED.health = 1; searchDrug(); searchFood(); } }
+  else if (view === 'trip') { loadTrip(); if (!LOADED.trip) { LOADED.trip = 1; searchMt(); } }
+  else if (view === 'air') loadAir();
+  else if (view === 'route' && RMAP) setTimeout(() => RMAP.invalidateSize(), 50);
+}
+(async function init() {
+  loadState(); renderFavs();
+  $('#nav').innerHTML = TABS.map(([v, t]) => '<button data-v="' + v + '">' + t + '</button>').join('');
+  document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.v));
+  $('#saveFav').onclick = () => { const n = prompt('저장할 이름', pos.name === '지도 선택' || pos.name === '내 위치' ? '' : pos.name); if (!n) return; favs = favs.filter(f => f.n !== n); favs.push({n, lat: +pos.lat, lon: +pos.lon}); pos.name = n; saveState(); renderFavs(); };
+  const doQ = async () => { const q = $('#q').value.trim(); if (!q) return; $('#qres').innerHTML = '<span class="muted">검색 중…</span>'; try { const g = await geocode(q); window._g = g; $('#qres').innerHTML = g.length ? g.map((x, i) => '<span class="chip" onclick="pickG(' + i + ')">' + esc(x.name) + ' <i>' + esc(x.full.split(',').slice(-4, -1).join(',').trim()) + '</i></span>').join(' ') : '<span class="muted">검색 결과가 없어요</span>'; } catch (e) { $('#qres').innerHTML = fail('검색 실패: ' + e.message); } };
+  window.pickG = i => { const g = window._g[i]; $('#qres').innerHTML = ''; $('#q').value = ''; setPos({lat: g.lat, lon: g.lon, name: g.name}); };
+  $('#qgo').onclick = doQ; $('#q').onkeydown = e => { if (e.key === 'Enter') doQ(); };
+  $('#geo').onclick = () => navigator.geolocation.getCurrentPosition(p => setPos({lat: p.coords.latitude, lon: p.coords.longitude, name: '내 위치'}), () => alert('위치 권한이 필요해요. 지역 검색이나 지도 클릭으로 지정해도 돼요.'));
+  $('#mrad').onchange = loadMap; $('#prad').onchange = loadPharm; $('#trad').onchange = loadTrip;
+  $('#rgo').onclick = doRoute; $('#to').onkeydown = $('#from').onkeydown = e => { if (e.key === 'Enter') doRoute(); };
+  $('#swap').onclick = () => { const a = $('#from').value; $('#from').value = $('#to').value; $('#to').value = a; };
+  $('#druggo').onclick = searchDrug; $('#drugq').onkeydown = e => { if (e.key === 'Enter') searchDrug(); };
+  $('#foodgo').onclick = searchFood; $('#foodq').onkeydown = e => { if (e.key === 'Enter') searchFood(); };
+  $('#mtgo').onclick = searchMt; $('#mtq').onkeydown = e => { if (e.key === 'Enter') searchMt(); };
+  $('#apsel').innerHTML = AIRPORTS.map(a => '<option value="' + a[0] + '">' + a[1] + '</option>').join(''); $('#apsel').value = 'GMP'; $('#apsel').onchange = loadKac;
+  $('#busarea').innerHTML = AREAS.map(a => '<option value="' + a[0] + '">' + a[1] + '</option>').join(''); $('#busarea').onchange = loadBus;
+  renderLayerChips(); renderTTypes();
+  $('#run').onclick = runPlay;
+  $('#copyUrl').onclick = () => { const u = new URL(GW); u.searchParams.set('api', $('#apiSel').value); Object.entries(formParams()).forEach(([k, v]) => u.searchParams.set(k, v)); navigator.clipboard.writeText(u.toString()).then(() => $('#status').textContent = '요청 URL을 복사했어요', () => $('#status').textContent = u.toString()); };
+  show('today');
+  try { CAT = await (await fetch(GW + '?api=_catalog')).json();
+    $('#apiSel').innerHTML = Object.entries(CAT.groups).map(([g, n]) => '<optgroup label="' + n + '">' + CAT.apis.filter(a => a.group === g).map(a => '<option value="' + a.id + '">' + esc(a.name) + '</option>').join('') + '</optgroup>').join('');
+    $('#apiSel').onchange = () => buildForm(CAT.apis.find(a => a.id === $('#apiSel').value));
+    buildForm(CAT.apis[0]); renderCatalog();
+  } catch (e) { $('#catBox').innerHTML = fail('카탈로그를 불러오지 못했어요: ' + e.message); }
+})();
+</script>
+</body>
+</html>
