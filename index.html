@@ -227,6 +227,25 @@ a{color:var(--pri)}
     </div>
   </section>
 
+  <section id="v-culture" class="hide">
+    <div class="card">
+      <span class="tag">문화·공연</span><h3>공연·행사 찾기 (전국)</h3>
+      <div id="cugenres" style="margin-bottom:8px"></div>
+      <div class="row">
+        <label class="muted">날짜 <input type="date" id="cudate"></label>
+        <label class="muted">지역 <select id="curegion"><option value="">전국</option><option value="11">서울</option><option value="41">경기</option><option value="28">인천</option><option value="26">부산</option><option value="27">대구</option><option value="30">대전</option><option value="12">전남·광주</option><option value="31">울산</option><option value="36">세종</option><option value="51">강원</option><option value="43">충북</option><option value="44">충남</option><option value="52">전북</option><option value="47">경북</option><option value="48">경남</option><option value="50">제주</option></select></label>
+        <input id="cuq" placeholder="제목 검색 (예: 재즈, 햄릿)" style="flex:1;min-width:180px" maxlength="20">
+        <button class="b" id="cugo">검색</button>
+        <button class="b g" id="cureset">초기화</button>
+      </div>
+      <div id="cuquick" style="margin-bottom:8px"></div>
+      <div id="cumeta" class="muted" style="margin-bottom:8px"></div>
+      <div class="grid" id="cures"></div>
+      <div id="cumore" style="margin-top:10px;text-align:center"></div>
+      <div class="muted" style="margin-top:10px"><b>출처</b>: 서울특별시 공공데이터(서울 열린데이터광장 · 서울문화포털 문화행사 정보), (재)예술경영지원센터 공연예술통합전산망(<a href="https://www.kopis.or.kr" target="_blank" rel="noopener">www.kopis.or.kr</a>). 두 곳의 정보를 합쳐 보여주고, 같은 공연은 한 건으로 합쳤어요. 서울 문화행사에는 전시·영화·교육·축제도 있고(서울만), KOPIS는 전국의 연극·뮤지컬·콘서트·클래식·국악·무용·서커스·마술 공연이에요. 날짜를 고르면 그날 열리는 행사(며칠 이어지는 행사 포함)만, 고르지 않으면 지금 열리는 행사와 곧 열릴 행사를 가까운 날짜순으로 보여줘요(KOPIS는 오늘부터 31일 이내, 제목 검색은 6개월 이내). 제목 검색에는 끝난 서울 행사도 나와요. 목록은 최대 300건까지 보여요. 요금과 일정은 주최 측 정보와 다를 수 있으니 예매처에서 꼭 확인하세요. KOPIS 공연의 요금·예매처는 카드의 "자세히"를 누르면 볼 수 있어요.</div>
+    </div>
+  </section>
+
   <section id="v-shop" class="hide">
     <div class="card" style="margin-bottom:12px">
       <span class="tag">쇼핑·재고</span><h3>다이소 매장 재고 찾기 <span class="tag" style="background:#fff4e5;color:#b54708">비공식</span></h3>
@@ -278,7 +297,7 @@ a{color:var(--pri)}
 
   <section id="v-cat" class="hide"><div id="catBox"></div></section>
 </main>
-<footer>데이터 출처: 디지털융합플랫폼(koreaconnect.kr) 제공 오픈API (OpenWeather, 기상청, ODsay, 인천국제공항공사, 한국공항공사, 식약처, 건강보험심사평가원, 한국관광공사, 부산시, 산림청, 고속도로 공공데이터포털), 다이소 재고는 비공식 서비스 다이소 파인더(daiso-finder.kr), 지도 © OpenStreetMap contributors, 위성 © Esri, 장소 검색 Nominatim. 인증키는 서버(n8n)에만 있고 이 페이지에는 없어요. 내 지역은 이 브라우저에 자동 저장돼요.</footer>
+<footer>데이터 출처: 디지털융합플랫폼(koreaconnect.kr) 제공 오픈API (OpenWeather, 기상청, ODsay, 인천국제공항공사, 한국공항공사, 식약처, 건강보험심사평가원, 한국관광공사, 부산시, 산림청, 고속도로 공공데이터포털), 서울 문화행사는 서울특별시 공공데이터(서울 열린데이터광장, 서울문화포털), 공연 정보는 (재)예술경영지원센터 공연예술통합전산망(www.kopis.or.kr), 다이소 재고는 비공식 서비스 다이소 파인더(daiso-finder.kr), 지도 © OpenStreetMap contributors, 위성 © Esri, 장소 검색 Nominatim. 인증키는 서버(n8n)에만 있고 이 페이지에는 없어요. 내 지역은 이 브라우저에 자동 저장돼요.</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -595,11 +614,11 @@ function initSafety() {
 
 // ---------- AI 비서 ----------
 const AIGW = 'https://n8n.aitestbed.kr/webhook/apihub-ai';
-const AIQ = ['오늘 우산 챙겨야 해?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천', '서울역에서 강남역 가는 법', '근처 다이소에 우산 있어?', '다이소 건전지 어디가 제일 가까워?'];
+const AIQ = ['오늘 우산 챙겨야 해?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천', '서울역에서 강남역 가는 법', '근처 다이소에 우산 있어?', '다이소 건전지 어디가 제일 가까워?', '이번 주말 공연 뭐 있어?', '이번 주말 뮤지컬 뭐 해?'];
 function addMsg(cls, text, small) { const c = $('#chat'); const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; if (small) { const sm = document.createElement('small'); sm.textContent = small; d.appendChild(sm); } c.appendChild(d); c.scrollTop = c.scrollHeight; return d; }
 async function askAI(q) {
   q = (q || $('#aiq').value).trim(); if (!q) return; $('#aiq').value = ''; $('#aigo').disabled = true; addMsg('u', q);
-  const wait = addMsg('a', '데이터를 찾아보는 중… (5~10초, 다이소 재고는 10초 넘게 걸릴 수 있어요)');
+  const wait = addMsg('a', '데이터를 찾아보는 중… (5~10초, 다이소 재고와 공연 검색은 더 걸릴 수 있어요)');
   try {
     const u = AIGW + '?q=' + encodeURIComponent(q) + '&lat=' + pos.lat + '&lon=' + pos.lon + '&name=' + encodeURIComponent(pos.name);
     const r = await fetch(u); const j = await r.json(); wait.remove();
@@ -611,6 +630,110 @@ async function askAI(q) {
 function initAI() {
   $('#aichips').innerHTML = AIQ.map(q => '<span class="chip" onclick="askAI(\'' + q + '\')">' + esc(q) + '</span>').join(' ');
   $('#aigo').onclick = () => askAI(); $('#aiq').onkeydown = e => { if (e.key === 'Enter') askAI(); };
+}
+
+// ---------- 문화·공연 (서울 문화행사 · 서울 열린데이터광장) ----------
+const CUGW = 'https://n8n.aitestbed.kr/webhook/apihub-culture';
+const CU_GENRES = [['', '전체'], ['콘서트', '콘서트'], ['연극', '연극'], ['뮤지컬/오페라', '뮤지컬·오페라'], ['클래식', '클래식'], ['무용', '무용'], ['서커스/마술', '서커스·마술'], ['국악', '국악'], ['독주/독창회', '독주·독창회'], ['전시/미술', '전시·미술'], ['영화', '영화'], ['교육/체험', '교육·체험'], ['축제-시민화합', '축제·시민화합'], ['축제-전통/역사', '축제·전통역사'], ['축제-문화/예술', '축제·문화예술'], ['축제-기타', '축제·기타'], ['기타', '기타']];
+let cuGenre = '', cuRows = [];
+const cuToday = () => new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+function cuAddDays(base, n) { const d = new Date(base + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+function cuStatus(r) {
+  let s = String(r.start || '').slice(0, 10), e = String(r.end || '').slice(0, 10);
+  if (!/^20\d\d-\d\d-\d\d$/.test(s) || !/^20\d\d-\d\d-\d\d$/.test(e)) { const p = String(r.date || '').split('~'); s = (p[0] || '').trim().slice(0, 10); e = (p[1] || p[0] || '').trim().slice(0, 10); }
+  const t = cuToday();
+  if (!/^20\d\d-\d\d-\d\d$/.test(s) || !/^20\d\d-\d\d-\d\d$/.test(e)) return null;
+  if (e < t) return '종료';
+  if (s > t) return '예정';
+  return '진행 중';
+}
+function renderCuGenres() {
+  $('#cugenres').innerHTML = CU_GENRES.map((g, i) => '<span class="chip' + (cuGenre === g[0] ? ' on' : '') + '" onclick="cuPick(' + i + ')">' + esc(g[1]) + '</span>').join(' ');
+}
+function renderCuQuick() {
+  const t = cuToday(), dow = new Date(t + 'T00:00:00Z').getUTCDay();
+  const sat = cuAddDays(t, (6 - dow + 7) % 7), sun = cuAddDays(t, (7 - dow) % 7);
+  const items = [['오늘', t], ['내일', cuAddDays(t, 1)], ['이번 토요일', sat], ['이번 일요일', sun]];
+  $('#cuquick').innerHTML = '<span class="muted">빠른 선택: </span>' + items.map(x => '<span class="chip" onclick="cuDate(\'' + x[1] + '\')">' + esc(x[0]) + ' <i>' + x[1].slice(5) + '</i></span>').join(' ');
+}
+function cuPick(i) { cuGenre = CU_GENRES[i][0]; renderCuGenres(); cuLoad(); }
+function cuDate(d) { $('#cudate').value = d; cuLoad(); }
+let cuPage = 1, cuPages = 1, cuReq = 0;
+async function cuLoad(more) {
+  if (more === true) cuPage++; else cuPage = 1;
+  const u = new URL(CUGW);
+  if (cuGenre) u.searchParams.set('genre', cuGenre);
+  const d = $('#cudate').value, q = $('#cuq').value.trim(), rg = $('#curegion').value;
+  if (d) u.searchParams.set('date', d);
+  if (q) u.searchParams.set('q', q);
+  if (rg) u.searchParams.set('region', rg);
+  u.searchParams.set('page', cuPage);
+  const my = ++cuReq;
+  if (more !== true) { $('#cumeta').textContent = '불러오는 중…'; $('#cures').innerHTML = ''; $('#cumore').innerHTML = ''; }
+  try {
+    const r = await fetch(u); const j = await r.json();
+    if (my !== cuReq) return;
+    if (!j.ok) { if (more === true) cuPage--; $('#cumeta').innerHTML = fail(j.message || j.error); return; }
+    cuPages = j.pages || 1;
+    const rows = j.rows || [];
+    const rgName = rg ? $('#curegion').options[$('#curegion').selectedIndex].text : '전국';
+    const cond = [rgName, cuGenre || '전체 분야', d ? d + ' 열리는 행사' : (q ? '' : '지금 열리는 행사·곧 열릴 행사'), q ? '"' + q + '" 검색' : ''].filter(Boolean).join(' · ');
+    if (more !== true && !rows.length) { $('#cumeta').textContent = cond + ': 조건에 맞는 행사가 없어요. 조건을 줄여보세요.' + (rg && rg !== '11' ? ' (전시·영화·교육·축제는 서울만 있어요)' : ''); return; }
+    const cap = j.cap || 300;
+    const tot = (+j.total).toLocaleString() + (j.total >= cap ? '건 이상' : '건');
+    const cn = j.counts ? ' · KOPIS ' + (+j.counts.kopis).toLocaleString() + '건, 서울문화포털 ' + (+j.counts.seoul).toLocaleString() + '건에서 모음' : '';
+    $('#cumeta').textContent = cond + ': ' + tot + cn + (j.cache === 'hit' ? ' (저장된 값)' : '') + (j.note ? ' · ' + j.note : '');
+    $('#cures').insertAdjacentHTML('beforeend', rows.map(cuCard).join(''));
+    $('#cumore').innerHTML = cuPage < cuPages ? '<button class="b g" onclick="cuLoad(true)">더 보기 (' + cuPage + '/' + cuPages + ')</button>' : '';
+  } catch (e) { if (my !== cuReq) return; if (more === true) cuPage--; $('#cumeta').innerHTML = fail('연결에 실패했어요: ' + e.message); }
+}
+function cuCard(r) {
+  const st = cuStatus(r);
+  const stHtml = st ? '<span class="tag" style="' + (st === '종료' ? 'background:#f2f4f7;color:#667085' : (st === '진행 중' ? 'background:#e6f6ec;color:#12a150' : '')) + '">' + st + '</span> ' : '';
+  const srcLabel = r.src === 'both' ? 'KOPIS·서울문화포털' : (r.src === 'kopis' ? 'KOPIS' : '서울문화포털');
+  const srcHtml = '<span class="tag" style="background:#f4f0ff;color:#6941c6">' + srcLabel + '</span> ';
+  const isK = (r.src === 'kopis' || r.src === 'both') && /^PF[0-9]+$/.test(r.kid || '');
+  const img = /^https:\/\//.test(r.img || '') ? '<img src="' + esc(r.img) + '" loading="lazy" style="width:100%;max-height:170px;object-fit:cover;border-radius:10px;margin-bottom:8px" onerror="this.remove()">' : '';
+  const link = /^https?:\/\//.test(r.link || '') ? '<a href="' + esc(r.link) + '" target="_blank" rel="noopener">' + (r.src === 'kopis' ? 'KOPIS 상세 페이지' : '예매·상세 보기') + '</a>' : '';
+  const mapUrl = r.lat && r.lng ? gmap(r.lat, r.lng, r.place || '') : (r.place ? gmap(0, 0, (r.place + ' ' + (r.area || '')).trim()) : '');
+  const map = mapUrl ? '<a href="' + esc(mapUrl) + '" target="_blank" rel="noopener">지도</a>' : '';
+  const more = isK ? '<a href="#" onclick="cuDetail(\'' + esc(r.kid) + '\');return false">자세히</a>' : '';
+  const fee = r.free === '무료' ? '<b style="color:var(--ok)">무료</b>' : (r.fee ? esc(r.fee) : (isK ? '<span class="muted">요금은 "자세히"에서 확인</span>' : '요금 정보 없음'));
+  const where = esc(r.place) + (r.src === 'seoul' ? (r.gu ? ' (' + esc(r.gu) + ')' : '') : (r.area ? ' (' + esc(r.area) + ')' : ''));
+  return '<div class="card" style="' + (st === '종료' ? 'opacity:.6' : '') + '">' + img +
+    '<span class="tag">' + esc(r.genre) + '</span> ' + stHtml + srcHtml +
+    '<h4>' + esc(r.title) + '</h4>' +
+    '<div class="d">' + esc(r.date) + (r.time ? ' · ' + esc(r.time) : '') + '</div>' +
+    '<div class="d">' + where + '</div>' +
+    '<div class="d">' + fee + '</div>' +
+    (r.player ? '<div class="d">출연: ' + esc(r.player.slice(0, 70)) + '</div>' : '') +
+    '<div class="kv" style="margin-top:6px">' + [link, map, more].filter(Boolean).join(' · ') + '</div>' +
+    (isK ? '<div id="cud-' + esc(r.kid) + '" style="margin-top:6px"></div>' : '') + '</div>';
+}
+async function cuDetail(kid) {
+  const box = document.getElementById('cud-' + kid); if (!box) return;
+  if (box.dataset.done) { box.innerHTML = ''; delete box.dataset.done; return; }
+  box.innerHTML = '<span class="muted">자세한 정보를 불러오는 중…</span>';
+  try {
+    const u = new URL(CUGW); u.searchParams.set('detail', kid);
+    const r = await fetch(u); const j = await r.json();
+    if (!j.ok) { box.innerHTML = fail(j.message || j.error); return; }
+    const d = j.detail || {};
+    const rel = (d.relates || []).filter(x => /^https?:\/\//.test(x.url)).map(x => '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">' + esc(x.name || '예매처') + '</a>').join(' · ');
+    const lines = [d.fee && '요금: ' + esc(d.fee), d.schedule && '일정: ' + esc(d.schedule), d.runtime && '공연시간: ' + esc(d.runtime), d.age && '관람연령: ' + esc(d.age), d.cast && '출연: ' + esc(d.cast), rel && '예매처: ' + rel].filter(Boolean);
+    box.innerHTML = '<div class="d" style="background:#f7f9fd;border-radius:8px;padding:8px">' + (lines.length ? lines.map(x => '<div>' + x + '</div>').join('') : '추가 정보가 없어요') + '</div>';
+    box.dataset.done = '1';
+  } catch (e) { box.innerHTML = fail('연결에 실패했어요: ' + e.message); }
+}
+function initCulture() {
+  if (LOADED.culture) return; LOADED.culture = 1;
+  renderCuGenres(); renderCuQuick();
+  $('#cugo').onclick = () => cuLoad();
+  $('#cuq').onkeydown = e => { if (e.key === 'Enter') cuLoad(); };
+  $('#cudate').onchange = () => cuLoad();
+  $('#curegion').onchange = () => cuLoad();
+  $('#cureset').onclick = () => { cuGenre = ''; $('#cudate').value = ''; $('#cuq').value = ''; $('#curegion').value = ''; renderCuGenres(); cuLoad(); };
+  cuLoad();
 }
 
 // ---------- 쇼핑: 다이소 재고 (비공식 · 다이소 파인더 중계) ----------
@@ -734,7 +857,7 @@ function initShop() {
 }
 
 // ---------- shell ----------
-const TABS = [['today', '오늘'], ['map', '지도'], ['route', '길찾기'], ['health', '약·건강'], ['trip', '여행·등산'], ['air', '공항'], ['safety', '안전·상권·법령'], ['shop', '쇼핑·재고'], ['ai', 'AI 비서'], ['cat', '카탈로그'], ['play', '플레이그라운드']];
+const TABS = [['today', '오늘'], ['map', '지도'], ['route', '길찾기'], ['health', '약·건강'], ['trip', '여행·등산'], ['air', '공항'], ['safety', '안전·상권·법령'], ['culture', '문화·공연'], ['shop', '쇼핑·재고'], ['ai', 'AI 비서'], ['cat', '카탈로그'], ['play', '플레이그라운드']];
 const LOADED = {};
 function show(v) {
   view = v;
@@ -749,6 +872,7 @@ function refresh() {
   else if (view === 'trip') { loadTrip(); if (!LOADED.trip) { LOADED.trip = 1; searchMt(); } }
   else if (view === 'air') loadAir();
   else if (view === 'safety') { if (!LOADED.safety) { LOADED.safety = 1; loadBiz(); loadFire(); loadTerm(); loadConst(); loadCctv(); } }
+  else if (view === 'culture') initCulture();
   else if (view === 'shop') initShop();
   else if (view === 'ai') $('#aiwhere').textContent = '기준 위치: ' + pos.name + ' (위치가 필요한 질문에 사용돼요)';
   else if (view === 'route' && RMAP) setTimeout(() => RMAP.invalidateSize(), 50);
