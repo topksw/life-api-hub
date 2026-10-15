@@ -242,7 +242,7 @@ a{color:var(--pri)}
       <div id="cumeta" class="muted" style="margin-bottom:8px"></div>
       <div class="grid" id="cures"></div>
       <div id="cumore" style="margin-top:10px;text-align:center"></div>
-      <div class="muted" style="margin-top:10px"><b>출처</b>: 서울특별시 공공데이터(서울 열린데이터광장 · 서울문화포털 문화행사 정보), (재)예술경영지원센터 공연예술통합전산망(<a href="https://www.kopis.or.kr" target="_blank" rel="noopener">www.kopis.or.kr</a>). 두 곳의 정보를 합쳐 보여주고, 같은 공연은 한 건으로 합쳤어요. 서울 문화행사에는 전시·영화·교육·축제도 있고(서울만), KOPIS는 전국의 연극·뮤지컬·콘서트·클래식·국악·무용·서커스·마술 공연이에요. 날짜를 고르면 그날 열리는 행사(며칠 이어지는 행사 포함)만, 고르지 않으면 지금 열리는 행사와 곧 열릴 행사를 가까운 날짜순으로 보여줘요(KOPIS는 오늘부터 31일 이내, 제목 검색은 6개월 이내). 제목 검색에는 끝난 서울 행사도 나와요. 목록은 최대 300건까지 보여요. 요금과 일정은 주최 측 정보와 다를 수 있으니 예매처에서 꼭 확인하세요. KOPIS 공연의 요금·예매처는 카드의 "자세히"를 누르면 볼 수 있어요.</div>
+      <div class="muted" style="margin-top:10px"><b>출처</b>: 서울특별시 공공데이터(서울 열린데이터광장 · 서울문화포털 문화행사 정보), (재)예술경영지원센터 공연예술통합전산망(<a href="https://www.kopis.or.kr" target="_blank" rel="noopener">www.kopis.or.kr</a>), 한국관광공사 국문 관광정보 서비스(TourAPI 행사정보). 세 곳의 정보를 합쳐 보여주고, 같은 행사는 한 건으로 합쳤어요. KOPIS는 전국의 연극·뮤지컬·콘서트·클래식·국악·무용·서커스·마술 공연, 한국관광공사는 전국 축제·행사, 서울문화포털은 서울의 공연·전시·영화·교육·축제예요. 날짜를 고르면 그날 열리는 행사(며칠 이어지는 행사 포함)만, 고르지 않으면 지금 열리는 행사와 곧 열릴 행사를 가까운 날짜순으로 보여줘요(KOPIS는 오늘부터 31일 이내, 축제는 90일 이내, 제목 검색은 KOPIS 6개월·축제 6개월 이내). 제목 검색에는 끝난 서울 행사도 나와요. 목록은 최대 300건까지 보여요. 요금과 일정은 주최 측 정보와 다를 수 있으니 예매처나 공식 안내에서 꼭 확인하세요. KOPIS 공연의 요금·예매처는 카드의 "자세히"를 누르면 볼 수 있어요.</div>
     </div>
   </section>
 
@@ -297,7 +297,7 @@ a{color:var(--pri)}
 
   <section id="v-cat" class="hide"><div id="catBox"></div></section>
 </main>
-<footer>데이터 출처: 디지털융합플랫폼(koreaconnect.kr) 제공 오픈API (OpenWeather, 기상청, ODsay, 인천국제공항공사, 한국공항공사, 식약처, 건강보험심사평가원, 한국관광공사, 부산시, 산림청, 고속도로 공공데이터포털), 서울 문화행사는 서울특별시 공공데이터(서울 열린데이터광장, 서울문화포털), 공연 정보는 (재)예술경영지원센터 공연예술통합전산망(www.kopis.or.kr), 다이소 재고는 비공식 서비스 다이소 파인더(daiso-finder.kr), 지도 © OpenStreetMap contributors, 위성 © Esri, 장소 검색 Nominatim. 인증키는 서버(n8n)에만 있고 이 페이지에는 없어요. 내 지역은 이 브라우저에 자동 저장돼요.</footer>
+<footer>데이터 출처: 디지털융합플랫폼(koreaconnect.kr) 제공 오픈API (OpenWeather, 기상청, ODsay, 인천국제공항공사, 한국공항공사, 식약처, 건강보험심사평가원, 한국관광공사, 부산시, 산림청, 고속도로 공공데이터포털), 서울 문화행사는 서울특별시 공공데이터(서울 열린데이터광장, 서울문화포털), 공연 정보는 (재)예술경영지원센터 공연예술통합전산망(www.kopis.or.kr), 축제·행사는 한국관광공사 국문 관광정보 서비스(TourAPI), 다이소 재고는 비공식 서비스 다이소 파인더(daiso-finder.kr), 지도 © OpenStreetMap contributors, 위성 © Esri, 장소 검색 Nominatim. 인증키는 서버(n8n)에만 있고 이 페이지에는 없어요. 내 지역은 이 브라우저에 자동 저장돼요.</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -614,7 +614,7 @@ function initSafety() {
 
 // ---------- AI 비서 ----------
 const AIGW = 'https://n8n.aitestbed.kr/webhook/apihub-ai';
-const AIQ = ['오늘 우산 챙겨야 해?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천', '서울역에서 강남역 가는 법', '근처 다이소에 우산 있어?', '다이소 건전지 어디가 제일 가까워?', '이번 주말 공연 뭐 있어?', '이번 주말 뮤지컬 뭐 해?'];
+const AIQ = ['오늘 우산 챙겨야 해?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천', '서울역에서 강남역 가는 법', '근처 다이소에 우산 있어?', '다이소 건전지 어디가 제일 가까워?', '이번 주말 공연 뭐 있어?', '이번 주말 뮤지컬 뭐 해?', '이번 주말 전국 축제 뭐 있어?'];
 function addMsg(cls, text, small) { const c = $('#chat'); const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; if (small) { const sm = document.createElement('small'); sm.textContent = small; d.appendChild(sm); } c.appendChild(d); c.scrollTop = c.scrollHeight; return d; }
 async function askAI(q) {
   q = (q || $('#aiq').value).trim(); if (!q) return; $('#aiq').value = ''; $('#aigo').disabled = true; addMsg('u', q);
@@ -634,7 +634,7 @@ function initAI() {
 
 // ---------- 문화·공연 (서울 문화행사 · 서울 열린데이터광장) ----------
 const CUGW = 'https://n8n.aitestbed.kr/webhook/apihub-culture';
-const CU_GENRES = [['', '전체'], ['콘서트', '콘서트'], ['연극', '연극'], ['뮤지컬/오페라', '뮤지컬·오페라'], ['클래식', '클래식'], ['무용', '무용'], ['서커스/마술', '서커스·마술'], ['국악', '국악'], ['독주/독창회', '독주·독창회'], ['전시/미술', '전시·미술'], ['영화', '영화'], ['교육/체험', '교육·체험'], ['축제-시민화합', '축제·시민화합'], ['축제-전통/역사', '축제·전통역사'], ['축제-문화/예술', '축제·문화예술'], ['축제-기타', '축제·기타'], ['기타', '기타']];
+const CU_GENRES = [['', '전체'], ['콘서트', '콘서트'], ['연극', '연극'], ['뮤지컬/오페라', '뮤지컬·오페라'], ['클래식', '클래식'], ['무용', '무용'], ['서커스/마술', '서커스·마술'], ['국악', '국악'], ['독주/독창회', '독주·독창회'], ['전시/미술', '전시·미술'], ['영화', '영화'], ['교육/체험', '교육·체험'], ['축제', '축제'], ['기타', '기타']];
 let cuGenre = '', cuRows = [];
 const cuToday = () => new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
 function cuAddDays(base, n) { const d = new Date(base + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
@@ -681,7 +681,7 @@ async function cuLoad(more) {
     if (more !== true && !rows.length) { $('#cumeta').textContent = cond + ': 조건에 맞는 행사가 없어요. 조건을 줄여보세요.' + (rg && rg !== '11' ? ' (전시·영화·교육·축제는 서울만 있어요)' : ''); return; }
     const cap = j.cap || 300;
     const tot = (+j.total).toLocaleString() + (j.total >= cap ? '건 이상' : '건');
-    const cn = j.counts ? ' · KOPIS ' + (+j.counts.kopis).toLocaleString() + '건, 서울문화포털 ' + (+j.counts.seoul).toLocaleString() + '건에서 모음' : '';
+    const cn = j.counts ? ' · ' + [j.counts.kopis ? 'KOPIS ' + (+j.counts.kopis).toLocaleString() + '건' : '', j.counts.seoul ? '서울문화포털 ' + (+j.counts.seoul).toLocaleString() + '건' : '', j.counts.tour ? '한국관광공사 ' + (+j.counts.tour).toLocaleString() + '건' : ''].filter(Boolean).join(', ') + '에서 모음' : '';
     $('#cumeta').textContent = cond + ': ' + tot + cn + (j.cache === 'hit' ? ' (저장된 값)' : '') + (j.note ? ' · ' + j.note : '');
     $('#cures').insertAdjacentHTML('beforeend', rows.map(cuCard).join(''));
     $('#cumore').innerHTML = cuPage < cuPages ? '<button class="b g" onclick="cuLoad(true)">더 보기 (' + cuPage + '/' + cuPages + ')</button>' : '';
@@ -690,18 +690,20 @@ async function cuLoad(more) {
 function cuCard(r) {
   const st = cuStatus(r);
   const stHtml = st ? '<span class="tag" style="' + (st === '종료' ? 'background:#f2f4f7;color:#667085' : (st === '진행 중' ? 'background:#e6f6ec;color:#12a150' : '')) + '">' + st + '</span> ' : '';
-  const srcLabel = r.src === 'both' ? 'KOPIS·서울문화포털' : (r.src === 'kopis' ? 'KOPIS' : '서울문화포털');
+  const SRCN = {seoul: '서울문화포털', kopis: 'KOPIS', tour: '한국관광공사'};
+  const srcLabel = (r.srcs && r.srcs.length ? r.srcs : [r.src === 'both' ? 'seoul' : r.src]).map(x => SRCN[x] || x).join('·');
+  const stateHtml = r.state ? '<span class="tag" style="background:#fef3f2;color:#d92d20">' + esc(r.state) + '</span> ' : '';
   const srcHtml = '<span class="tag" style="background:#f4f0ff;color:#6941c6">' + srcLabel + '</span> ';
   const isK = (r.src === 'kopis' || r.src === 'both') && /^PF[0-9]+$/.test(r.kid || '');
   const img = /^https:\/\//.test(r.img || '') ? '<img src="' + esc(r.img) + '" loading="lazy" style="width:100%;max-height:170px;object-fit:cover;border-radius:10px;margin-bottom:8px" onerror="this.remove()">' : '';
-  const link = /^https?:\/\//.test(r.link || '') ? '<a href="' + esc(r.link) + '" target="_blank" rel="noopener">' + (r.src === 'kopis' ? 'KOPIS 상세 페이지' : '예매·상세 보기') + '</a>' : '';
+  const link = /^https?:\/\//.test(r.link || '') ? '<a href="' + esc(r.link) + '" target="_blank" rel="noopener">' + (r.src === 'kopis' ? 'KOPIS 상세 페이지' : (r.src === 'tour' ? '검색해서 자세히 보기' : '예매·상세 보기')) + '</a>' : '';
   const mapUrl = r.lat && r.lng ? gmap(r.lat, r.lng, r.place || '') : (r.place ? gmap(0, 0, (r.place + ' ' + (r.area || '')).trim()) : '');
   const map = mapUrl ? '<a href="' + esc(mapUrl) + '" target="_blank" rel="noopener">지도</a>' : '';
   const more = isK ? '<a href="#" onclick="cuDetail(\'' + esc(r.kid) + '\');return false">자세히</a>' : '';
-  const fee = r.free === '무료' ? '<b style="color:var(--ok)">무료</b>' : (r.fee ? esc(r.fee) : (isK ? '<span class="muted">요금은 "자세히"에서 확인</span>' : '요금 정보 없음'));
+  const fee = r.free === '무료' ? '<b style="color:var(--ok)">무료</b>' : (r.fee ? esc(r.fee) : (isK ? '<span class="muted">요금은 "자세히"에서 확인</span>' : (r.src === 'tour' ? '<span class="muted">요금·세부 일정은 검색 링크에서 확인</span>' : '요금 정보 없음')));
   const where = esc(r.place) + (r.src === 'seoul' ? (r.gu ? ' (' + esc(r.gu) + ')' : '') : (r.area ? ' (' + esc(r.area) + ')' : ''));
   return '<div class="card" style="' + (st === '종료' ? 'opacity:.6' : '') + '">' + img +
-    '<span class="tag">' + esc(r.genre) + '</span> ' + stHtml + srcHtml +
+    '<span class="tag">' + esc(r.genre) + '</span> ' + stHtml + stateHtml + srcHtml +
     '<h4>' + esc(r.title) + '</h4>' +
     '<div class="d">' + esc(r.date) + (r.time ? ' · ' + esc(r.time) : '') + '</div>' +
     '<div class="d">' + where + '</div>' +
