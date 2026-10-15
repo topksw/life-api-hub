@@ -227,6 +227,30 @@ a{color:var(--pri)}
     </div>
   </section>
 
+  <section id="v-shop" class="hide">
+    <div class="card" style="margin-bottom:12px">
+      <span class="tag">쇼핑·재고</span><h3>다이소 매장 재고 찾기 <span class="tag" style="background:#fff4e5;color:#b54708">비공식</span></h3>
+      <div class="row">
+        <input id="dsq" placeholder="매장 이름·지역 (예: 잠실, 강남역)" style="flex:1;min-width:200px">
+        <button class="b" id="dsgo">매장 검색</button>
+        <button class="b g" id="dsnear">내 기준 위치 근처</button>
+      </div>
+      <div id="dsstores"></div>
+      <div id="dscur" class="muted" style="margin-top:6px">매장을 먼저 골라주세요.</div>
+    </div>
+    <div class="card" id="dsprodcard">
+      <span class="tag">쇼핑·재고</span><h3>선택한 매장에서 상품 찾기</h3>
+      <div class="row">
+        <input id="dspq" placeholder="상품명 (예: 칫솔, 수납박스, 건전지)" style="flex:1;min-width:200px">
+        <button class="b" id="dspgo">재고 검색</button>
+      </div>
+      <div id="dsprog" class="muted"></div>
+      <div id="dsprod"></div>
+      <div id="dsdetail"></div>
+      <div class="muted" style="margin-top:8px">다이소 파인더(daiso-finder.kr) 비공식 API를 n8n으로 중계해요. 다이소가 공식 제공하는 API가 아니라서 언제든 바뀌거나 중단될 수 있어요. 재고 수량·진열 위치는 실시간이 아니라서 방문 전에 달라질 수 있고, 마트에 입점한 일부 매장은 조회되지 않을 수 있어요. 재고 검색은 느릴 때 10초 넘게 걸리고, 훑어본 범위 안의 재고 상품만 보여줘요. 같은 검색은 5분간 저장된 값을 보여줘요.</div>
+    </div>
+  </section>
+
   <section id="v-ai" class="hide">
     <div class="card">
       <span class="tag">AI 비서</span><h3>허브 데이터로 답해주는 AI 비서</h3>
@@ -254,7 +278,7 @@ a{color:var(--pri)}
 
   <section id="v-cat" class="hide"><div id="catBox"></div></section>
 </main>
-<footer>데이터 출처: 디지털융합플랫폼(koreaconnect.kr) 제공 오픈API (OpenWeather, 기상청, ODsay, 인천국제공항공사, 한국공항공사, 식약처, 건강보험심사평가원, 한국관광공사, 부산시, 산림청, 고속도로 공공데이터포털), 지도 © OpenStreetMap contributors, 위성 © Esri, 장소 검색 Nominatim. 인증키는 서버(n8n)에만 있고 이 페이지에는 없어요. 내 지역은 이 브라우저에 자동 저장돼요.</footer>
+<footer>데이터 출처: 디지털융합플랫폼(koreaconnect.kr) 제공 오픈API (OpenWeather, 기상청, ODsay, 인천국제공항공사, 한국공항공사, 식약처, 건강보험심사평가원, 한국관광공사, 부산시, 산림청, 고속도로 공공데이터포털), 다이소 재고는 비공식 서비스 다이소 파인더(daiso-finder.kr), 지도 © OpenStreetMap contributors, 위성 © Esri, 장소 검색 Nominatim. 인증키는 서버(n8n)에만 있고 이 페이지에는 없어요. 내 지역은 이 브라우저에 자동 저장돼요.</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -571,11 +595,11 @@ function initSafety() {
 
 // ---------- AI 비서 ----------
 const AIGW = 'https://n8n.aitestbed.kr/webhook/apihub-ai';
-const AIQ = ['오늘 우산 챙겨야 해?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천', '서울역에서 강남역 가는 법'];
+const AIQ = ['오늘 우산 챙겨야 해?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천', '서울역에서 강남역 가는 법', '근처 다이소에 우산 있어?', '다이소 건전지 어디가 제일 가까워?'];
 function addMsg(cls, text, small) { const c = $('#chat'); const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; if (small) { const sm = document.createElement('small'); sm.textContent = small; d.appendChild(sm); } c.appendChild(d); c.scrollTop = c.scrollHeight; return d; }
 async function askAI(q) {
   q = (q || $('#aiq').value).trim(); if (!q) return; $('#aiq').value = ''; $('#aigo').disabled = true; addMsg('u', q);
-  const wait = addMsg('a', '데이터를 찾아보는 중… (5~10초)');
+  const wait = addMsg('a', '데이터를 찾아보는 중… (5~10초, 다이소 재고는 10초 넘게 걸릴 수 있어요)');
   try {
     const u = AIGW + '?q=' + encodeURIComponent(q) + '&lat=' + pos.lat + '&lon=' + pos.lon + '&name=' + encodeURIComponent(pos.name);
     const r = await fetch(u); const j = await r.json(); wait.remove();
@@ -589,8 +613,128 @@ function initAI() {
   $('#aigo').onclick = () => askAI(); $('#aiq').onkeydown = e => { if (e.key === 'Enter') askAI(); };
 }
 
+// ---------- 쇼핑: 다이소 재고 (비공식 · 다이소 파인더 중계) ----------
+const DS = 'https://n8n.aitestbed.kr/webhook/apihub-daiso';
+let DSTORE = null, DSLIST = [], DSPROD = [];
+try { DSTORE = JSON.parse(localStorage.getItem('apihub-daiso') || 'null'); } catch (e) {}
+async function ds(params) {
+  const u = new URL(DS);
+  Object.entries(params).forEach(([k, v]) => { if (v !== '' && v != null) u.searchParams.set(k, v); });
+  const r = await fetch(u); let j = null;
+  try { j = await r.json(); } catch (e) {}
+  if (!j) throw new Error('응답을 읽지 못했어요 (' + r.status + ')');
+  return j;
+}
+const dsMsg = j => (j && (j.message || j.error)) || '불러오기 실패';
+function renderDsCur() {
+  $('#dscur').innerHTML = DSTORE
+    ? '선택한 매장: <b>' + esc(DSTORE.name) + '</b> · ' + esc(DSTORE.address || '') + ' · ' + esc(DSTORE.openTime || '') + '~' + esc(DSTORE.closeTime || '')
+    : '매장을 먼저 골라주세요.';
+}
+function renderDsStores() {
+  $('#dsstores').innerHTML = DSLIST.length
+    ? '<div class="strip" style="flex-wrap:wrap;overflow:visible;margin-top:8px">' + DSLIST.map((s, i) => '<span class="chip' + (DSTORE && DSTORE.code === s.code ? ' on' : '') + '" onclick="dsPick(' + i + ')">' + esc(s.name) + ' <i>' + esc((s.address || '').replace(/\(.*\)/, '').trim()) + '</i></span>').join(' ') + '</div>'
+    : '';
+}
+async function dsFindStores(near) {
+  const q = $('#dsq').value.trim();
+  if (!near && !q) { $('#dsstores').innerHTML = '<span class="muted">매장 이름이나 지역을 입력해주세요</span>'; return; }
+  $('#dsstores').innerHTML = '<span class="muted">매장 찾는 중…</span>';
+  try {
+    const j = await ds(near ? {op: 'stores', lat: pos.lat, lng: pos.lon, pageSize: 8} : {op: 'stores', keyword: q, pageSize: 10});
+    if (!j.ok) { $('#dsstores').innerHTML = fail(dsMsg(j)); return; }
+    DSLIST = Array.isArray(j.data) ? j.data : [];
+    if (!DSLIST.length) { $('#dsstores').innerHTML = '<span class="muted">검색 결과가 없어요</span>'; return; }
+    renderDsStores();
+  } catch (e) { $('#dsstores').innerHTML = fail(e.message); }
+}
+function dsPick(i) {
+  DSTORE = DSLIST[i];
+  try { localStorage.setItem('apihub-daiso', JSON.stringify(DSTORE)); } catch (e) {}
+  renderDsStores(); renderDsCur();
+  $('#dsprod').innerHTML = ''; $('#dsdetail').innerHTML = '';
+  if ($('#dspq').value.trim()) dsSearch();
+}
+async function dsSearch() {
+  if (!DSTORE) { $('#dsprog').innerHTML = '<span class="bad">먼저 위에서 매장을 골라주세요</span>'; return; }
+  const kw = $('#dspq').value.trim();
+  if (!kw) { $('#dsprog').innerHTML = '<span class="bad">상품명을 입력해주세요</span>'; return; }
+  const btn = $('#dspgo'); btn.disabled = true; $('#dsprod').innerHTML = ''; $('#dsdetail').innerHTML = '';
+  const t0 = Date.now();
+  const tick = () => { $('#dsprog').textContent = '재고 확인 중… ' + Math.round((Date.now() - t0) / 1000) + '초 (느리면 10초 넘게 걸려요)'; };
+  tick(); const timer = setInterval(tick, 1000);
+  try {
+    const j = await ds({op: 'products', branchCode: DSTORE.code, keyword: kw});
+    $('#dsprog').textContent = '';
+    if (!j.ok) { $('#dsprod').innerHTML = fail(dsMsg(j)); return; }
+    DSPROD = (j.data && j.data.products) || [];
+    const badge = j.cache === 'hit' ? '저장된 값' : (j.cache === 'stale' ? '이전 값 (원본 오류)' : '방금 조회');
+    if (!DSPROD.length) { $('#dsprod').innerHTML = '<div class="muted">' + esc(DSTORE.name) + '에서 재고가 확인된 상품이 없어요. 검색어를 바꿔보세요. (' + badge + ')</div>'; return; }
+    $('#dsprod').innerHTML = '<table><tr><th></th><th>상품</th><th>가격</th><th>재고</th><th>진열</th></tr>' + DSPROD.map((p, i) =>
+      '<tr><td>' + (p.image ? '<img src="' + esc(p.image) + '" width="40" height="40" loading="lazy" style="border-radius:6px">' : '') + '</td>' +
+      '<td><a href="#" onclick="dsDetail(' + i + ');return false">' + esc(p.name) + '</a></td>' +
+      '<td>' + (+p.price).toLocaleString() + '원</td>' +
+      '<td>' + (p.stock > 0 ? '<b>' + p.stock + '개</b>' : '<span class="bad">없음</span>') + '</td>' +
+      '<td>' + (p.stairNo != null ? esc(p.stairNo) + '층 ' + esc(p.zoneNo) + '구역' : '-') + '</td></tr>').join('') +
+      '</table><div class="muted" style="margin-top:4px">' + DSPROD.length + '개 · ' + badge + ' · 상품을 누르면 근처 다른 매장 재고도 볼 수 있어요</div>';
+  } catch (e) { $('#dsprog').textContent = ''; $('#dsprod').innerHTML = fail(e.message); }
+  finally { clearInterval(timer); btn.disabled = false; }
+}
+const dsKm = (a, b, c, d) => { const t = x => x * Math.PI / 180, R = 6371, dl = t(c - a), dn = t(d - b); const x = Math.sin(dl / 2) ** 2 + Math.cos(t(a)) * Math.cos(t(c)) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); };
+function dsOpenNow(o, c) {
+  const k = new Date(Date.now() + 9 * 3600000), m = k.getUTCHours() * 60 + k.getUTCMinutes();
+  const t = s => { const p = String(s || '').split(':').map(Number); return p[0] * 60 + (p[1] || 0); };
+  const s = t(o); let e = t(c);
+  if (isNaN(s) || isNaN(e)) return null;
+  if (!e) e = 1440;
+  return m >= s && m < e;
+}
+async function dsDetail(i) {
+  const p = DSPROD[i]; if (!p || !DSTORE) return;
+  const box = $('#dsdetail');
+  box.innerHTML = '<div class="muted" style="margin-top:10px">근처 매장 재고 확인 중…</div>';
+  box.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  try {
+    const j = await ds({op: 'product', id: p.id, branchCode: DSTORE.code});
+    if (!j.ok) { box.innerHTML = fail(dsMsg(j)); return; }
+    const d = j.data || {}, ob = d.otherBranches || [];
+    const cos = await Promise.all(ob.map(x => ds({op: 'store', code: x.code}).then(r => r.ok ? r.data : null).catch(() => null)));
+    const rows = ob.map((x, k) => {
+      const s = cos[k];
+      const km = s && DSTORE.lat != null ? dsKm(+DSTORE.lat, +DSTORE.lng, +s.lat, +s.lng) : null;
+      return {name: x.name, address: x.address, stock: x.stock, km, open: s ? dsOpenNow(s.openTime, s.closeTime) : null, hours: s ? s.openTime + '~' + s.closeTime : '', lat: s && s.lat, lng: s && s.lng};
+    });
+    rows.sort((u, v) => (u.km == null) - (v.km == null) || u.km - v.km);
+    const openBadge = o => o === true ? '<span style="color:var(--ok)">영업 중</span>' : (o === false ? '<span class="bad">영업 종료</span>' : '<span class="muted">-</span>');
+    const me = {name: DSTORE.name + ' (선택 매장)', address: DSTORE.address, stock: d.stock, km: 0, open: dsOpenNow(DSTORE.openTime, DSTORE.closeTime), hours: (DSTORE.openTime || '') + '~' + (DSTORE.closeTime || ''), lat: DSTORE.lat, lng: DSTORE.lng};
+    const all = [me].concat(rows);
+    const goods = all.filter(r => r.stock > 0 && r.open !== false);
+    box.innerHTML = '<div class="card" style="margin-top:10px;background:#f7f9fd"><h4>' + esc(p.name) + ' · 근처 매장 재고</h4>' +
+      '<div class="d">' + (d.stairNo != null ? esc(DSTORE.name) + ' 진열 위치: ' + esc(d.stairNo) + '층 ' + esc(d.zoneNo) + '구역 · ' : '') + '선택 매장에서 가까운 순이에요.' +
+      (goods.length ? ' 지금 가면 살 수 있는 곳 <b>' + goods.length + '곳</b>.' : ' 지금 영업 중이면서 재고가 있는 곳이 없어요.') + '</div>' +
+      '<table style="margin-top:6px"><tr><th>매장</th><th>거리</th><th>재고</th><th>영업</th><th></th></tr>' + all.map(r =>
+        '<tr' + (r.stock > 0 && r.open !== false ? '' : ' style="opacity:.55"') + '><td>' + esc(r.name) + '<div class="muted">' + esc((r.address || '').replace(/\(.*\)/, '').trim()) + '</div></td>' +
+        '<td>' + (r.km == null ? '-' : (r.km < 0.05 ? '-' : r.km.toFixed(1) + 'km')) + '</td>' +
+        '<td>' + (r.stock > 0 ? '<b>' + esc(r.stock) + '개</b>' : '<span class="bad">없음</span>') + '</td>' +
+        '<td>' + openBadge(r.open) + '<div class="muted">' + esc(r.hours) + '</div></td>' +
+        '<td>' + (r.lat ? '<a href="' + esc(gmap(r.lat, r.lng, r.name.replace(' (선택 매장)', ''))) + '" target="_blank" rel="noopener">지도</a>' : '') + '</td></tr>').join('') +
+      '</table>' + (ob.length ? '' : '<div class="d">근처 다른 매장에 재고가 없거나 정보가 없어요</div>') +
+      '<div class="muted" style="margin-top:6px">재고는 실시간이 아니라서 방문 전에 달라질 수 있어요. 검색어가 같아도 다른 상품이 섞일 수 있어요(예: 마스크 검색 시 마스크팩).</div></div>';
+  } catch (e) { box.innerHTML = fail(e.message); }
+}
+function initShop() {
+  if (LOADED.shop) return; LOADED.shop = 1;
+  $('#dsgo').onclick = () => dsFindStores(false);
+  $('#dsnear').onclick = () => dsFindStores(true);
+  $('#dspgo').onclick = dsSearch;
+  $('#dsq').onkeydown = e => { if (e.key === 'Enter') dsFindStores(false); };
+  $('#dspq').onkeydown = e => { if (e.key === 'Enter') dsSearch(); };
+  if (DSTORE) { DSLIST = [DSTORE]; renderDsStores(); }
+  renderDsCur();
+}
+
 // ---------- shell ----------
-const TABS = [['today', '오늘'], ['map', '지도'], ['route', '길찾기'], ['health', '약·건강'], ['trip', '여행·등산'], ['air', '공항'], ['safety', '안전·상권·법령'], ['ai', 'AI 비서'], ['cat', '카탈로그'], ['play', '플레이그라운드']];
+const TABS = [['today', '오늘'], ['map', '지도'], ['route', '길찾기'], ['health', '약·건강'], ['trip', '여행·등산'], ['air', '공항'], ['safety', '안전·상권·법령'], ['shop', '쇼핑·재고'], ['ai', 'AI 비서'], ['cat', '카탈로그'], ['play', '플레이그라운드']];
 const LOADED = {};
 function show(v) {
   view = v;
@@ -605,6 +749,7 @@ function refresh() {
   else if (view === 'trip') { loadTrip(); if (!LOADED.trip) { LOADED.trip = 1; searchMt(); } }
   else if (view === 'air') loadAir();
   else if (view === 'safety') { if (!LOADED.safety) { LOADED.safety = 1; loadBiz(); loadFire(); loadTerm(); loadConst(); loadCctv(); } }
+  else if (view === 'shop') initShop();
   else if (view === 'ai') $('#aiwhere').textContent = '기준 위치: ' + pos.name + ' (위치가 필요한 질문에 사용돼요)';
   else if (view === 'route' && RMAP) setTimeout(() => RMAP.invalidateSize(), 50);
 }
