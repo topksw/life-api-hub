@@ -54,6 +54,14 @@ pre{background:#0f172a;color:#d1e0ff;padding:12px;border-radius:10px;overflow:au
 .muted{color:var(--sub);font-size:12px}
 .aqi1{color:#12a150}.aqi2{color:#65a30d}.aqi3{color:#f79009}.aqi4{color:#ea580c}.aqi5{color:#d92d20}
 footer{max-width:1100px;margin:0 auto;padding:0 16px 28px;color:var(--sub);font-size:12px}
+.up{color:#d92d20}.dn{color:#2563eb}.flat{color:var(--sub)}
+.mkt td.num,.mkt th.num{text-align:right;white-space:nowrap}
+.mkt tr.sel td{background:var(--pri2)}
+.mkt tbody tr{cursor:pointer}
+.mkt .nm{font-weight:600}
+.mkt .sub{font-size:11px;color:var(--sub)}
+.bdg{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;background:#fff4e5;color:#b54708;margin-left:4px;white-space:nowrap}
+.notice{background:#fffaf0;border:1px solid #fedf89;border-radius:10px;padding:10px 12px;font-size:12px;color:#7a2e0e;line-height:1.6}
 .hide{display:none!important}
 #map,#rmap{height:480px;border-radius:14px;border:1px solid var(--line)}
 #rmap{height:360px;margin-bottom:12px}
@@ -298,6 +306,19 @@ a{color:var(--pri)}
         <div class="muted">헌법재판소 자료실의 헌법 1~10호 개정본이에요. 파일은 한글(hwp)이에요.</div>
       </div>
     </div>
+      <div class="card" id="lwcard" style="margin-top:12px">
+      <span class="tag">안전·상권·법령</span><h3>수돗물 수질 (정수장 측정값) <span class="tag" style="background:#eef4ff">한국수자원공사</span></h3>
+      <div class="row">
+        <input id="lwq" placeholder="지역 (예: 수성구, 화성시, 동탄)" style="flex:1;min-width:200px" maxlength="20">
+        <button class="b" id="lwgo">정수장 찾기</button>
+      </div>
+      <div id="lwlist"></div>
+      <div id="lwout" style="margin-top:8px"></div>
+      <div class="notice" style="margin-top:10px">
+        정수장에서 측정한 값이며 우리 집 수도꼭지 수질이 아니에요. 한국수자원공사(광역상수도) 공급 지역만 조회돼서 서울·부산 등 자체 운영 지역은 목록에 없을 수 있어요.<br>
+        이 화면은 숫자만 보여주고 안전·위험을 판단하지 않아요. 수질 판정과 공지는 거주지 수도사업자에게 확인하세요. 출처: 한국수자원공사.
+      </div>
+    </div>
   </section>
 
   <section id="v-culture" class="hide">
@@ -341,6 +362,54 @@ a{color:var(--pri)}
       <div id="dsdetail"></div>
       <div class="muted" style="margin-top:8px">다이소 파인더(daiso-finder.kr) 비공식 API를 n8n으로 중계해요. 다이소가 공식 제공하는 API가 아니라서 언제든 바뀌거나 중단될 수 있어요. 재고 수량·진열 위치는 실시간이 아니라서 방문 전에 달라질 수 있고, 마트에 입점한 일부 매장은 조회되지 않을 수 있어요. 재고 검색은 느릴 때 10초 넘게 걸리고, 훑어본 범위 안의 재고 상품만 보여줘요. 같은 검색은 5분간 저장된 값을 보여줘요.</div>
     </div>
+
+    <div class="card" id="lgcard" style="margin-top:12px">
+      <span class="tag">쇼핑·재고</span><h3>생필품 조사 가격 비교 <span class="tag" style="background:#eef4ff">한국소비자원 참가격</span></h3>
+      <div class="row">
+        <input id="lgq" placeholder="상품명 (예: 참기름, 우유, 라면)" style="flex:1;min-width:200px" maxlength="20">
+        <button class="b" id="lggo">상품 찾기</button>
+      </div>
+      <div id="lglist"></div>
+      <div id="lgsel" class="muted" style="margin-top:6px">상품을 먼저 골라주세요.</div>
+      <div class="row" style="margin-top:6px"><label class="muted">지역 <select id="lgsido"></select></label></div>
+      <div id="lgout"></div>
+      <div class="notice" style="margin-top:10px">
+        한국소비자원 참가격 조사 기준 가격이에요(대개 격주 금요일 조사). 실제 매장 가격·행사·재고와 다를 수 있으니 방문 전에 확인하세요. 현재 가격이나 실시간 가격이 아니에요.<br>
+        출처: 한국소비자원(참가격), 디지털융합플랫폼 제공 API. 상품은 참가격이 조사하는 품목만 나와요.
+      </div>
+    </div>
+  </section>
+
+  <section id="v-market" class="hide">
+    <div class="card" style="margin-bottom:12px">
+      <span class="tag">시세</span><h3>가상자산 시세 비교 <span class="tag" style="background:#eef4ff">업비트 · 빗썸</span></h3>
+      <div class="row">
+        <select id="mkmode"><option value="top">거래대금 상위 20</option><option value="watch">내 관심 종목</option></select>
+        <input id="mkwatch" placeholder="관심 종목 (예: BTC,ETH,XRP)" style="flex:1;min-width:180px" maxlength="80">
+        <button class="b g" id="mkwsave">관심 종목 저장</button>
+        <button class="b" id="mkgo">새로고침</button>
+        <label class="muted"><input type="checkbox" id="mkauto"> 15초마다 자동</label>
+      </div>
+      <div id="mkstat" class="muted" style="margin-bottom:6px"></div>
+      <div class="scroll"><table class="mkt"><thead><tr><th>종목</th><th class="num">업비트</th><th class="num">빗썸</th><th class="num">가격차</th><th class="num">24h 거래대금(업비트)</th></tr></thead><tbody id="mkbody"><tr><td colspan="5" class="muted">시세를 불러오는 중…</td></tr></tbody></table></div>
+      <div class="notice" style="margin-top:10px">
+        투자 권유가 아니라 참고용 시세예요. 값은 수초 늦을 수 있고 거래소 점검·장애 때 비어 보일 수 있어요.<br>
+        등락률 기준 시각이 달라요: 업비트는 전일 09:00(KST) 종가, 빗썸은 당일 00:00(KST) 기준이라 서로 바로 비교할 수 없어요.<br>
+        가격차는 두 거래소 현재가의 차이일 뿐이에요. 수수료·송금 시간·호가 잔량·입출금 제한을 반영하지 않아 차익 기회를 뜻하지 않아요.<br>
+        “유의” 배지는 업비트가 공지한 유의·주의 표시를 그대로 보여주는 거예요. 빗썸 쪽 표시는 포함하지 않아요.<br>
+        출처: 업비트 Open API, 빗썸 Open API (인증 없이 쓰는 공개 시세). 빗썸 전체 시세는 구 버전 엔드포인트라 예고 없이 바뀔 수 있어요.
+      </div>
+    </div>
+    <div class="card" id="mkchartcard">
+      <span class="tag">시세</span><h3 id="mkct">차트</h3>
+      <div class="row">
+        <select id="mkex"><option value="upbit">업비트</option><option value="bithumb">빗썸</option></select>
+        <select id="mkunit"><option value="days">일봉</option><option value="m240">4시간봉</option><option value="m60">1시간봉</option><option value="weeks">주봉</option></select>
+        <span class="muted" id="mkcs">표에서 종목을 눌러주세요.</span>
+      </div>
+      <div id="mkchart"></div>
+      <div class="muted">빨강은 상승, 파랑은 하락 봉이에요. 최근 60개 봉이에요. 거래소마다 봉 기준 시각이 달라요.</div>
+    </div>
   </section>
 
   <section id="v-ai" class="hide">
@@ -370,7 +439,7 @@ a{color:var(--pri)}
 
   <section id="v-cat" class="hide"><div id="catBox"></div></section>
 </main>
-<footer>데이터 출처: 디지털융합플랫폼(koreaconnect.kr) 제공 오픈API (OpenWeather, 기상청, ODsay, 인천국제공항공사, 한국공항공사, 식약처, 건강보험심사평가원, 한국관광공사, 부산시, 산림청, 고속도로 공공데이터포털), 서울 문화행사는 서울특별시 공공데이터(서울 열린데이터광장, 서울문화포털), 공연 정보는 (재)예술경영지원센터 공연예술통합전산망(www.kopis.or.kr), 축제·행사·숙박은 한국관광공사 국문 관광정보 서비스(TourAPI), 캠핑장은 한국관광공사 고캠핑, 걷기 길은 한국관광공사 두루누비, 다이소 재고는 비공식 서비스 다이소 파인더(daiso-finder.kr), 지도 © OpenStreetMap contributors, 위성 © Esri, 장소 검색 Nominatim. 인증키는 서버(n8n)에만 있고 이 페이지에는 없어요. 내 지역은 이 브라우저에 자동 저장돼요.</footer>
+<footer>데이터 출처: 디지털융합플랫폼(koreaconnect.kr) 제공 오픈API (OpenWeather, 기상청, ODsay, 인천국제공항공사, 한국공항공사, 식약처, 건강보험심사평가원, 한국관광공사, 부산시, 산림청, 고속도로 공공데이터포털), 서울 문화행사는 서울특별시 공공데이터(서울 열린데이터광장, 서울문화포털), 공연 정보는 (재)예술경영지원센터 공연예술통합전산망(www.kopis.or.kr), 축제·행사·숙박은 한국관광공사 국문 관광정보 서비스(TourAPI), 캠핑장은 한국관광공사 고캠핑, 걷기 길은 한국관광공사 두루누비, 다이소 재고는 비공식 서비스 다이소 파인더(daiso-finder.kr), 가상자산 시세는 업비트 Open API·빗썸 Open API, 생필품 조사 가격은 한국소비자원 참가격, 수돗물 수질은 한국수자원공사, 자동차 경로·이동시간은 카카오모빌리티(카카오내비), 지도 © OpenStreetMap contributors, 위성 © Esri, 장소 검색 Nominatim. 인증키는 서버(n8n)에만 있고 이 페이지에는 없어요. 내 지역은 이 브라우저에 자동 저장돼요.</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -1141,8 +1210,185 @@ ipRender=function(){ipMapDestroy();if(IPPLAN){if(!IPPLAN.days.every(d=>Array.isA
 function ipEnhanceInit(){const h=document.createElement('div');h.id='ipbook';h.className='card';$('#ipcard').appendChild(h);try{const raw=localStorage.getItem(IPBOOKKEY);if(raw){if(raw.length>1000000)throw Error('size');const b=JSON.parse(raw);if(b.version!==1||!Array.isArray(b.places))throw Error('format');IPBOOK=b.places.filter(ipValid);}}catch(e){$('#ipstatus').textContent='보관함 복원 실패. 기존 저장값은 덮어쓰지 않습니다.';}$('#ipcard').addEventListener('change',e=>{if(e.target.dataset.ipcompare===undefined)return;const r=IPBOOK[+e.target.dataset.ipcompare];if(!r)return;if(e.target.checked){if(IPCOMPARE.size>=3){e.target.checked=false;$('#ipstatus').textContent='비교는 최대 3곳입니다.';return;}IPCOMPARE.add(r.id);}else IPCOMPARE.delete(r.id);ipCompareRender();});$('#ipcard').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset;if(a.ipsave!==undefined){ipSavePlace(a.ipsave);return;}if(a.ipdelete!==undefined){const r=IPBOOK[+a.ipdelete];if(!r)return;IPCOMPARE.delete(r.id);IPBOOK.splice(+a.ipdelete,1);ipBookPersist();ipBookRender();return;}if(!IPPLAN)return;const before=JSON.stringify(IPPLAN);const p=IPPLAN;if(a.ipremove!==undefined){const [di,n]=a.ipremove.split(':').map(Number),list=di<0?p.stays:p.days[di]?.items;if(!list?.[n])return;(p.exclusions||(p.exclusions=[])).push({day:di,index:n,item:list.splice(n,1)[0],at:new Date().toISOString()});}else if(a.ipundo!==undefined){const n=+a.ipundo,x=p.exclusions?.[n];if(!x)return;if(ipFind(x.item.id)){$('#ipstatus').textContent='같은 ID가 이미 일정에 있어 되돌릴 수 없습니다.';return;}const list=x.day<0?p.stays:p.days[x.day]?.items;if(!list)return;list.splice(Math.min(x.index,list.length),0,x.item);p.exclusions.splice(n,1);}else if(a.ipadd!==undefined){const i=+a.ipadd,r=IPBOOK[i];if(!r)return;if(p.conditions.mode!=='general'){$('#ipstatus').textContent='동행조건 일정에는 보관함 추가를 차단합니다. 해당 조건으로 새 일정을 생성하세요.';return;}if(ipFind(r.id)){$('#ipstatus').textContent='같은 콘텐츠 ID가 이미 일정에 있습니다.';return;}if(ipDistance(p.conditions.origin,r)>20){$('#ipstatus').textContent='저장 일정 기준 반경 20km 밖의 장소는 추가할 수 없습니다.';return;}const di=+$('#ipbook').querySelector('[data-ipday="'+i+'"]').value,role=$('#ipbook').querySelector('[data-iprole="'+i+'"]').value;if(r.type==='32')p.stays.push({...r,kind:'숙소 후보'});else if(p.days[di])p.days[di].items.push({...r,kind:role==='food'?'식사·카페 후보(메뉴 확인)':'관광'});else return;}else return;ipRecalc(p);if(!ipPersist()){IPPLAN=JSON.parse(before);}ipRender();});ipBookRender();}
 
 // ---------- shell ----------
-const TABS = [['today', '오늘'], ['map', '지도'], ['route', '길찾기'], ['health', '약·건강'], ['trip', '여행·등산'], ['air', '공항'], ['safety', '안전·상권·법령'], ['culture', '문화·공연'], ['shop', '쇼핑·재고'], ['ai', 'AI 비서'], ['cat', '카탈로그'], ['play', '플레이그라운드']];
+const TABS = [['today', '오늘'], ['map', '지도'], ['route', '길찾기'], ['health', '약·건강'], ['trip', '여행·등산'], ['air', '공항'], ['safety', '안전·상권·법령'], ['culture', '문화·공연'], ['shop', '쇼핑·재고'], ['market', '시세'], ['ai', 'AI 비서'], ['cat', '카탈로그'], ['play', '플레이그라운드']];
 const LOADED = {};
+
+
+// Life APIs: 참가격 price survey + 정수장 water quality (read-only display; no judgments).
+const LFAPI='https://n8n.aitestbed.kr/webhook/apihub-life';
+const LFSIDO=['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'];
+let LFP={good:null,seq:0,sido:'',inited:false},LFW={seq:0,inited:false};
+async function lfFetch(qs){
+  const ac=new AbortController();const to=setTimeout(()=>ac.abort(),45000);
+  try{const r=await fetch(LFAPI+'?'+qs,{signal:ac.signal});let j=null;try{j=await r.json();}catch(e){}
+    if(!r.ok||!j||j.ok===false)throw new Error((j&&j.message)||('서버 응답 오류 ('+r.status+')'));return j;}
+  finally{clearTimeout(to);}
+}
+function lfErr(e){return e.name==='AbortError'?'응답이 늦어요':(e instanceof TypeError?'네트워크 연결이나 서버 상태를 확인해주세요':e.message);}
+function lfNum(n){return (n==null||!isFinite(n))?'-':Number(n).toLocaleString('ko-KR');}
+function lfDate(d){return /^\d{8}$/.test(d)?d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8):'-';}
+function lfInitPrice(){
+  if(LFP.inited)return; LFP.inited=true;
+  $('#lgsido').innerHTML='<option value="">전국</option>'+LFSIDO.map(s=>'<option>'+s+'</option>').join('');
+  const m=LFSIDO.find(s=>String(pos&&pos.name||'').indexOf(s)===0); if(m){$('#lgsido').value=m;}
+  $('#lggo').onclick=lfGoods; $('#lgq').onkeydown=e=>{if(e.key==='Enter')lfGoods();};
+  $('#lgsido').onchange=()=>{if(LFP.good)lfPrice();};
+}
+async function lfGoods(){
+  const q=$('#lgq').value.trim(); if(!q){$('#lglist').innerHTML='<span class="muted">상품명을 입력해주세요.</span>';return;}
+  if(!/^[\w가-힣 ·.\-()]{1,20}$/.test(q)){$('#lglist').innerHTML='<span class="warn">상품명은 글자·숫자·공백·괄호만 20자 이하로 입력해주세요.</span>';return;}
+  $('#lglist').innerHTML='<span class="muted">찾는 중…</span>';
+  try{
+    const j=await lfFetch('op=goods&q='+encodeURIComponent(q));
+    if(!j.rows||!j.rows.length){$('#lglist').innerHTML='<span class="muted">“'+esc(q)+'” 상품이 없어요. 참가격이 조사하는 품목('+lfNum(j.listed)+'개)만 검색돼요. 다른 이름으로 찾아보세요.</span>';return;}
+    $('#lglist').innerHTML=(j.total>j.rows.length?'<div class="muted">'+lfNum(j.total)+'개 중 '+j.rows.length+'개만 보여줘요. 검색어를 더 구체적으로 입력해보세요.</div>':'')+j.rows.filter(r=>/^\d{1,7}$/.test(String(r.id))).map(r=>'<span class="chip" data-g="'+esc(r.id)+'" data-n="'+esc(r.name)+'">'+esc(r.name)+(r.spec?' <i>'+esc(r.spec)+'</i>':'')+'</span>').join(' ');
+    document.querySelectorAll('#lglist .chip[data-g]').forEach(c=>c.onclick=()=>{LFP.good={id:c.dataset.g,name:c.dataset.n};lfPrice();});
+  }catch(e){$('#lglist').innerHTML='<span class="bad">상품을 불러오지 못했어요: '+esc(lfErr(e))+'</span> <button class="b g" id="lgretry">다시 시도</button>';$('#lgretry').onclick=lfGoods;}
+}
+async function lfPrice(){
+  const g=LFP.good; if(!g)return; const my=++LFP.seq; const sido=$('#lgsido').value;
+  $('#lgsel').innerHTML='선택한 상품: <b>'+esc(g.name)+'</b>';
+  $('#lgout').innerHTML='<span class="muted">가격을 불러오는 중…</span>';
+  try{
+    const j=await lfFetch('op=price&goodId='+encodeURIComponent(g.id)+(sido?'&sido='+encodeURIComponent(sido):''));
+    if(my!==LFP.seq)return;
+    if(!j.date){$('#lgout').innerHTML='<div class="warn">'+esc(j.note||'최근 조사일의 가격 자료가 없어요.')+'</div>';return;}
+    const st=j.stats, prev=j.prevStats; const kstToday=new Date(Date.now()+9*3600000);
+    const dd=j.date; const dt=new Date(Date.UTC(+dd.slice(0,4),+dd.slice(4,6)-1,+dd.slice(6,8))); const ageDays=Math.floor((Date.UTC(kstToday.getUTCFullYear(),kstToday.getUTCMonth(),kstToday.getUTCDate())-dt.getTime())/86400000);
+    let h='';
+    if(ageDays>21)h+='<div class="warn" style="margin-bottom:6px">오래된 자료예요. 조사일이 '+ageDays+'일 전이라 지금 가격과 많이 다를 수 있어요.</div>';
+    if(j.partial)h+='<div class="warn" style="margin-bottom:6px">'+esc(j.note||'일부 조사일 조회에 실패했어요.')+'</div>';
+    if(!st||!j.rows||!j.rows.length){h+='<div class="muted">'+(sido?esc(sido)+' 지역에서 ':'')+'조사일 '+esc(lfDate(dd))+'의 가격 자료가 없어요.'+(sido&&j.allStats?' 지역을 전국으로 바꿔보세요.':'')+'</div>';$('#lgout').innerHTML=h;return;}
+    h+='<div class="kv" style="margin-bottom:6px">조사일 <b>'+esc(lfDate(dd))+'</b> · '+(sido?esc(sido)+' ':'전국 ')+'판매점 <b>'+lfNum(st.n)+'곳</b> 기준</div>';
+    h+='<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-bottom:8px">'
+      +'<div class="card"><div class="muted">최저</div><div class="big" style="font-size:22px">'+lfNum(st.min)+'원</div></div>'
+      +'<div class="card"><div class="muted">중앙값</div><div class="big" style="font-size:22px">'+lfNum(st.median)+'원</div></div>'
+      +'<div class="card"><div class="muted">최고</div><div class="big" style="font-size:22px">'+lfNum(st.max)+'원</div></div></div>';
+    if(prev&&prev.median!=null&&j.prevDate){const d=st.median-prev.median;const pc=prev.median?Math.round(d/prev.median*1000)/10:0;h+='<div class="muted" style="margin-bottom:6px">지난 조사('+esc(lfDate(j.prevDate))+') 중앙값 '+lfNum(prev.median)+'원 대비 '+(d>0?'+':'')+lfNum(d)+'원 ('+(pc>0?'+':'')+pc+'%)</div>';}
+    else h+='<div class="muted" style="margin-bottom:6px">지난 조사와 비교할 자료가 없어요.</div>';
+    if(sido&&j.allStats)h+='<div class="muted" style="margin-bottom:6px">참고: 전국 중앙값 '+lfNum(j.allStats.median)+'원 (판매점 '+lfNum(j.allStats.n)+'곳)</div>';
+    const gd=j.good||{}; const per=(gd.u==='G'||gd.u==='ML')&&gd.t>0;
+    h+='<div class="scroll"><table><thead><tr><th>판매점</th><th>주소</th><th class="num" style="text-align:right">가격</th>'+(per?'<th style="text-align:right">100'+(gd.u==='G'?'g':'ml')+'당 환산</th>':'')+'</tr></thead><tbody>'
+      +j.rows.map(r=>{const low=r.p===st.min;return '<tr'+(low?' style="background:#eefbf2"':'')+'><td>'+(r.s?esc(r.s):'<span class="muted">(판매점 정보 없음)</span>')+(low?' <span class="bdg" style="background:#e7f8ee;color:#12803f">최저가</span>':'')+'</td><td>'+esc(r.a||'')+'</td><td style="text-align:right;white-space:nowrap"><b>'+lfNum(r.p)+'원</b></td>'+(per?'<td style="text-align:right;white-space:nowrap">'+lfNum(Math.round(r.p/gd.t*100))+'원</td>':'')+'</tr>';}).join('')
+      +'</tbody></table></div>';
+    if(j.total>j.rows.length)h+='<div class="muted" style="margin-top:4px">가격이 낮은 순으로 '+j.rows.length+'곳만 보여줘요(전체 '+lfNum(j.total)+'곳).</div>';
+    if(j.unknownStores)h+='<div class="muted" style="margin-top:4px">판매점 정보를 찾지 못한 '+j.unknownStores+'곳은 이름 없이 표시돼요.</div>';
+    $('#lgout').innerHTML=h;
+  }catch(e){if(my!==LFP.seq)return;$('#lgout').innerHTML='<span class="bad">가격을 불러오지 못했어요: '+esc(lfErr(e))+'</span> <button class="b g" id="lgretry2">다시 시도</button>';$('#lgretry2').onclick=lfPrice;}
+}
+function lfInitWater(){
+  if(LFW.inited)return; LFW.inited=true;
+  $('#lwgo').onclick=lfSupply; $('#lwq').onkeydown=e=>{if(e.key==='Enter')lfSupply();};
+}
+async function lfSupply(){
+  const q=$('#lwq').value.trim(); if(q.length<2){$('#lwlist').innerHTML='<span class="muted">지역 이름을 2글자 이상 입력해주세요.</span>';return;}
+  if(!/^[\w가-힣 ·.\-()]{2,20}$/.test(q)){$('#lwlist').innerHTML='<span class="warn">지역 이름은 글자·숫자·공백만 20자 이하로 입력해주세요.</span>';return;}
+  $('#lwlist').innerHTML='<span class="muted">찾는 중… (몇 초 걸려요)</span>'; $('#lwout').innerHTML='';
+  try{
+    const j=await lfFetch('op=wsupply&q='+encodeURIComponent(q));
+    if(!j.rows||!j.rows.length){$('#lwlist').innerHTML='<span class="muted">“'+esc(q)+'” 지역은 공급지역 목록에 없어요. 한국수자원공사(광역상수도) 공급 지역만 조회돼요.</span>';return;}
+    $('#lwlist').innerHTML=(j.total>j.rows.length?'<div class="muted">'+lfNum(j.total)+'곳 중 '+j.rows.length+'곳만 보여줘요.</div>':'')+j.rows.filter(r=>/^\d{10}$/.test(String(r.facNo))).map(r=>'<div style="margin:4px 0"><span class="chip" data-f="'+esc(r.facNo)+'">'+esc(r.addr)+' <i>'+esc(r.fac)+'</i></span>'+(r.sidoMatch===false?' <span class="bdg" title="원본 자료의 공급지역과 정수장이 같은 시도로 보이지 않아요. 확인이 필요해요.">공급지역 목록의 정수장이 해당 시도와 다른 곳으로 보여요(원본 매핑 확인 필요)</span>':'')+'</div>').join('');
+    document.querySelectorAll('#lwlist .chip[data-f]').forEach(c=>c.onclick=()=>lfQuality(c.dataset.f));
+  }catch(e){$('#lwlist').innerHTML='<span class="bad">정수장 목록을 불러오지 못했어요: '+esc(lfErr(e))+'</span> <button class="b g" id="lwretry">다시 시도</button>';$('#lwretry').onclick=lfSupply;}
+}
+function lfWT(t){return /^\d{10}$/.test(t)?t.slice(4,6)+'-'+t.slice(6,8)+' '+t.slice(8,10)+'시':'-';}
+async function lfQuality(fac){
+  if(!/^\d{10}$/.test(fac))return; const my=++LFW.seq;
+  $('#lwout').innerHTML='<span class="muted">측정값을 불러오는 중… (처음엔 10~20초 걸릴 수 있어요)</span>';
+  try{
+    const j=await lfFetch('op=wquality&fac='+encodeURIComponent(fac)+'&hours=24');
+    if(my!==LFW.seq)return; const rows=j.rows||[];
+    if(!rows.length){$('#lwout').innerHTML='<div class="warn">최근 24시간 측정값이 없어요.</div>';return;}
+    const u=j.units||{}; const L=rows[0];
+    const fmt=(v,d)=>v==null?'-':Number(v).toFixed(d);
+    let h='<div><b>'+esc(j.name||'정수장')+'</b> <span class="muted">'+esc(j.addr||'')+(j.kind?' · '+esc(j.kind):'')+'</span></div>'
+      +'<div class="muted" style="margin:2px 0 6px">시설 주소가 위에서 고른 지역과 맞는지 직접 확인하세요. 가장 최근 측정: '+esc(lfWT(L.t))+'</div>'
+      +'<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:8px">'
+      +'<div class="card"><div class="muted">잔류염소</div><div class="big" style="font-size:22px">'+fmt(L.cl,3)+'</div><div class="muted">'+esc(u.cl||'mg/L')+'</div></div>'
+      +'<div class="card"><div class="muted">pH</div><div class="big" style="font-size:22px">'+fmt(L.ph,2)+'</div><div class="muted">'+esc(u.ph||'pH')+'</div></div>'
+      +'<div class="card"><div class="muted">탁도</div><div class="big" style="font-size:22px">'+fmt(L.tb,3)+'</div><div class="muted">'+esc(u.tb||'NTU')+'</div></div></div>'
+      +'<div class="scroll" style="max-height:300px"><table><thead><tr><th>측정 시각(KST)</th><th style="text-align:right">잔류염소</th><th style="text-align:right">pH</th><th style="text-align:right">탁도</th></tr></thead><tbody>'
+      +rows.slice(0,25).map(r=>'<tr><td>'+esc(lfWT(r.t))+'</td><td style="text-align:right">'+fmt(r.cl,3)+'</td><td style="text-align:right">'+fmt(r.ph,2)+'</td><td style="text-align:right">'+fmt(r.tb,3)+'</td></tr>').join('')+'</tbody></table></div>';
+    $('#lwout').innerHTML=h;
+  }catch(e){if(my!==LFW.seq)return;$('#lwout').innerHTML='<span class="bad">측정값을 불러오지 못했어요: '+esc(lfErr(e))+'</span> <button class="b g" id="lwretry2">다시 시도</button>';$('#lwretry2').onclick=()=>lfQuality(fac);}
+}
+
+// Crypto quotes (Upbit/Bithumb public data). Read-only; no keys, no trading.
+const MKAPI='https://n8n.aitestbed.kr/webhook/apihub-market';
+const MKWKEY='life-api-hub-market-watch-v1';
+const MKCAUT={PRICE_FLUCTUATIONS:'가격 급등락',TRADING_VOLUME_SOARING:'거래량 급증',DEPOSIT_AMOUNT_SOARING:'입금량 급증',GLOBAL_PRICE_DIFFERENCES:'해외 가격 차이',CONCENTRATION_OF_SMALL_ACCOUNTS:'소수 계정 집중'};
+const MKUNIT={days:'일봉',m240:'4시간봉',m60:'1시간봉',weeks:'주봉'};
+let MK={watch:['BTC','ETH','XRP','SOL','DOGE'],sel:null,seq:0,cseq:0,timer:null,rows:[]};
+function mkSymOk(s){return typeof s==='string'&&/^[A-Z0-9]{2,10}$/.test(s);}
+function mkLoadWatch(){try{const a=JSON.parse(localStorage.getItem(MKWKEY)||'null');if(Array.isArray(a)&&a.length&&a.length<=12&&a.every(mkSymOk))MK.watch=Array.from(new Set(a));}catch(e){}}
+function mkPrice(p){if(p==null||!isFinite(p))return '-';const d=p>=1000?0:p>=100?1:p>=1?2:4;return Number(p).toLocaleString('ko-KR',{maximumFractionDigits:d});}
+function mkWon(v){if(v==null||!isFinite(v))return '-';if(v>=1e12)return (v/1e12).toFixed(2)+'조';if(v>=1e8)return Math.round(v/1e8).toLocaleString('ko-KR')+'억';return Math.round(v/1e4).toLocaleString('ko-KR')+'만';}
+function mkRate(r){if(r==null||!isFinite(r))return '<span class="flat">-</span>';const c=r>0?'up':r<0?'dn':'flat';return '<span class="'+c+'">'+(r>0?'+':'')+r.toFixed(2)+'%</span>';}
+function mkKst(ts){if(!ts)return '-';return new Date(ts+9*3600000).toISOString().slice(11,19);}
+function mkInit(){
+  if(LOADED.market){mkLoad();return;} LOADED.market=1;
+  mkLoadWatch(); $('#mkwatch').value=MK.watch.join(',');
+  $('#mkgo').onclick=mkLoad; $('#mkmode').onchange=mkLoad;
+  $('#mkwsave').onclick=()=>{const a=Array.from(new Set($('#mkwatch').value.toUpperCase().split(',').map(s=>s.trim()).filter(Boolean)));if(!a.length||a.length>12||!a.every(mkSymOk)){$('#mkstat').innerHTML='<span class="bad">관심 종목은 BTC,ETH 처럼 영문·숫자 심볼 12개 이하로 입력해주세요.</span>';return;}MK.watch=a;try{localStorage.setItem(MKWKEY,JSON.stringify(a));}catch(e){}$('#mkmode').value='watch';mkLoad();};
+  $('#mkex').onchange=mkChart; $('#mkunit').onchange=mkChart;
+  $('#mkauto').onchange=()=>{clearInterval(MK.timer);MK.timer=null;if($('#mkauto').checked)MK.timer=setInterval(()=>{if(view==='market'&&!document.hidden)mkLoad();},15000);};
+  mkLoad();
+}
+async function mkFetch(qs){
+  const ac=new AbortController();const to=setTimeout(()=>ac.abort(),25000);
+  try{const r=await fetch(MKAPI+'?'+qs,{signal:ac.signal});let j=null;try{j=await r.json();}catch(e){}
+    if(!r.ok||!j||j.ok===false)throw new Error((j&&j.message)||('서버 응답 오류 ('+r.status+')'));return j;}
+  finally{clearTimeout(to);}
+}
+async function mkLoad(){
+  const my=++MK.seq; const watch=$('#mkmode').value==='watch';
+  $('#mkstat').innerHTML='<span class="muted">불러오는 중…</span>';
+  try{
+    const j=await mkFetch(watch?'op=ticker&sym='+encodeURIComponent(MK.watch.join(',')):'op=top&n=20');
+    if(my!==MK.seq)return; MK.rows=(j.rows||[]).filter(r=>r.u||r.b);
+    const age=j.serverTs?Math.max(0,Math.round((Date.now()-j.serverTs)/1000)):0;
+    let st='업비트 체결 '+mkKst(j.uTs)+' · 빗썸 기준 '+mkKst(j.bTs)+' (KST)';
+    if(j.cache&&j.cache!=='miss')st+=' · 저장된 값';
+    if(j.partial)st+=' <span class="warn">'+esc(j.note||'일부 거래소만 표시')+'</span>';
+    if(j.notFound&&j.notFound.length)st+=' <span class="warn">두 거래소 모두 없는 종목: '+j.notFound.map(esc).join(', ')+'</span>';
+    $('#mkstat').innerHTML=st;
+    mkRender();
+  }catch(e){
+    if(my!==MK.seq)return;
+    $('#mkstat').innerHTML='<span class="bad">시세를 불러오지 못했어요: '+esc(e.name==='AbortError'?'응답이 늦어요':(e instanceof TypeError?'네트워크 연결이나 서버 상태를 확인해주세요':e.message))+'</span> <button class="b g" onclick="mkLoad()">다시 시도</button>';
+  }
+}
+function mkRender(){
+  if(!MK.rows.length){$('#mkbody').innerHTML='<tr><td colspan="5" class="muted">표시할 종목이 없어요.</td></tr>';return;}
+  $('#mkbody').innerHTML=MK.rows.map(r=>{
+    const bd=(r.warn?'<span class="bdg">업비트 유의</span>':'')+(r.caution||[]).map(c=>'<span class="bdg">'+esc(MKCAUT[c]||c)+'</span>').join('');
+    const big=r.gap!=null&&Math.abs(r.gap)>=5;const gap=r.gap==null?'<span class="flat">-</span>':'<span class="flat">'+(r.gap>0?'+':'')+r.gap.toFixed(2)+'%</span>'+(big?'<div><span class="bdg" title="원인은 알 수 없어요. 각 거래소에서 직접 확인하세요.">가격차 큼 · 직접 확인</span></div>':'');
+    const cell=(x,ex)=>x?'<b>'+mkPrice(x.p)+'</b><div class="sub">'+mkRate(x.r)+'</div>':'<span class="muted">미상장·미조회</span>';
+    return '<tr data-s="'+esc(r.s)+'"'+(MK.sel&&MK.sel===r.s?' class="sel"':'')+'><td><span class="nm">'+esc(r.ko||r.s)+'</span> <span class="sub">'+esc(r.s)+'</span>'+bd+'</td><td class="num">'+cell(r.u)+'</td><td class="num">'+cell(r.b)+'</td><td class="num">'+gap+'</td><td class="num">'+mkWon(r.u&&r.u.v)+'</td></tr>';
+  }).join('');
+  document.querySelectorAll('#mkbody tr[data-s]').forEach(tr=>tr.onclick=()=>{const s=tr.dataset.s;if(!mkSymOk(s))return;MK.sel=s;const r=MK.rows.find(x=>x.s===s);$('#mkex').value=(r&&r.u)?'upbit':'bithumb';mkRender();mkChart();$('#mkchartcard').scrollIntoView({behavior:'smooth',block:'nearest'});});
+}
+async function mkChart(){
+  const s=MK.sel; if(!s)return; const ex=$('#mkex').value, unit=$('#mkunit').value; const my=++MK.cseq;
+  const r=MK.rows.find(x=>x.s===s); $('#mkct').textContent=((r&&r.ko)||s)+' ('+s+'/KRW) · '+(ex==='upbit'?'업비트':'빗썸')+' '+(MKUNIT[unit]||'');
+  $('#mkcs').textContent='불러오는 중…'; $('#mkchart').innerHTML='';
+  try{
+    const j=await mkFetch('op=candles&ex='+ex+'&sym='+encodeURIComponent(s)+'&unit='+unit+'&count=60');
+    if(my!==MK.cseq)return; const rows=j.rows||[];
+    if(rows.length<2){$('#mkcs').textContent='표시할 봉이 부족해요.';return;}
+    const W=640,H=260,pl=6,pr=64,pt=10,pb=22; const hi=Math.max.apply(null,rows.map(x=>x.h)), lo=Math.min.apply(null,rows.map(x=>x.l)); const n=rows.length, bw=Math.max(2,(W-pl-pr)/n*0.6);
+    const X=i=>pl+(W-pl-pr)*(i+0.5)/n, Y=v=>pt+(H-pt-pb)*(hi-v)/((hi-lo)||1);
+    let g='';
+    rows.forEach((c,i)=>{const col=c.c>=c.o?'#d92d20':'#2563eb';const yo=Y(c.o),yc=Y(c.c);g+='<line x1="'+X(i)+'" x2="'+X(i)+'" y1="'+Y(c.h)+'" y2="'+Y(c.l)+'" stroke="'+col+'"/><rect x="'+(X(i)-bw/2)+'" y="'+Math.min(yo,yc)+'" width="'+bw+'" height="'+Math.max(1,Math.abs(yo-yc))+'" fill="'+col+'"/>';});
+    const lab=(v,y)=>'<text x="'+(W-pr+4)+'" y="'+y+'" font-size="11" fill="#667085">'+esc(mkPrice(v))+'</text>';
+    g+=lab(hi,pt+8)+lab(lo,H-pb)+lab(rows[n-1].c,Y(rows[n-1].c)+4);
+    g+='<text x="'+pl+'" y="'+(H-6)+'" font-size="11" fill="#667085">'+esc(rows[0].t.slice(5,16).replace('T',' '))+'</text><text x="'+(W-pr)+'" y="'+(H-6)+'" text-anchor="end" font-size="11" fill="#667085">'+esc(rows[n-1].t.slice(5,16).replace('T',' '))+'</text>';
+    $('#mkchart').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:720px;height:auto;background:#fff;border:1px solid var(--line);border-radius:10px" role="img" aria-label="'+esc(s)+' 캔들 차트">'+g+'</svg>';
+    const chg=(rows[n-1].c-rows[0].c)/rows[0].c*100;
+    $('#mkcs').innerHTML='구간 고가 '+esc(mkPrice(hi))+' · 저가 '+esc(mkPrice(lo))+' · 구간 변동 '+mkRate(Math.round(chg*100)/100)+' (봉 시각 KST)';
+  }catch(e){if(my!==MK.cseq)return;$('#mkcs').innerHTML='<span class="bad">차트를 불러오지 못했어요: '+esc(e.message)+'</span>';}
+}
+
 
 
 // Departure briefing: independent storage, saved-plan origin only, explicit KST forecast slots.
@@ -1310,9 +1556,10 @@ function refresh() {
   else if (view === 'health') { loadPharm(); if (!LOADED.health) { LOADED.health = 1; searchDrug(); searchFood(); } }
   else if (view === 'trip') { if(IPMAP)setTimeout(()=>IPMAP?.invalidateSize(),60); ipWhere(); loadTrip(); if (!LOADED.trip) { LOADED.trip = 1; searchMt(); } if (!initTravel() && TCMODE === 'near') tcLoad('near'); }
   else if (view === 'air') loadAir();
-  else if (view === 'safety') { if (!LOADED.safety) { LOADED.safety = 1; loadBiz(); loadFire(); loadTerm(); loadConst(); loadCctv(); } }
+  else if (view === 'safety') { lfInitWater(); if (!LOADED.safety) { LOADED.safety = 1; loadBiz(); loadFire(); loadTerm(); loadConst(); loadCctv(); } }
   else if (view === 'culture') initCulture();
-  else if (view === 'shop') initShop();
+  else if (view === 'shop') { initShop(); lfInitPrice(); }
+  else if (view === 'market') mkInit();
   else if (view === 'ai') $('#aiwhere').textContent = '기준 위치: ' + pos.name + ' (위치가 필요한 질문에 사용돼요)';
   else if (view === 'route' && RMAP) setTimeout(() => RMAP.invalidateSize(), 50);
 }
@@ -1392,6 +1639,83 @@ const ipNPrevRender=ipRender;ipRender=function(){ipNPrevRender();ipNRender();};
 const ipNPrevInit=ipEnhanceInit;ipEnhanceInit=function(){ipNPrevInit();ipNRender();window.addEventListener('beforeunload',e=>{if(IPNDIRTY){e.preventDefault();e.returnValue='';}});};
 
 const ipNPrevGenerate=ipGenerate;ipGenerate=async function(){const h=$('#ipnotebook');if(h)h.inert=true;try{return await ipNPrevGenerate();}finally{if(h)h.inert=false;}};
+
+
+// Real road route (Kakao Mobility navi, car). Real-time only: results stay in memory, are never saved/exported.
+const RTAPI='https://n8n.aitestbed.kr/webhook/apihub-route';
+let RT={res:null,busy:false,seq:0,layer:null,day:'0',prio:'RECOMMEND',msg:''};
+function rtFmtT(s){const m=Math.max(1,Math.round(s/60));return m>=60?Math.floor(m/60)+'시간 '+(m%60?m%60+'분':''):m+'분';}
+function rtFmtD(m){return m>=1000?(m/1000).toFixed(1)+'km':Math.round(m)+'m';}
+function rtPoints(di){
+  const p=IPPLAN,d=p&&p.days[di];if(!d)return null;const o=p.conditions&&p.conditions.origin;
+  if(!o||!Number.isFinite(o.lat)||!Number.isFinite(o.lon))return null;
+  const raw=[{n:o.name||'기준위치',lat:o.lat,lon:o.lon}];
+  d.items.forEach((r,n)=>{if(ipValid(r))raw.push({n:(di+1)+'-'+(n+1)+' '+r.title,lat:r.lat,lon:r.lon});});
+  const pts=[raw[0]];let skipped=0;
+  for(let i=1;i<raw.length;i++){const a=pts[pts.length-1],b=raw[i];if(ipDistance(a,b)*1000<10){skipped++;continue;}pts.push(b);}
+  return {pts:pts,skipped:skipped};
+}
+async function rtFetch(chunk,prio){
+  const ac=new AbortController();const to=setTimeout(()=>ac.abort(),25000);
+  try{
+    const qs='pts='+encodeURIComponent(chunk.map(p=>p.lat.toFixed(6)+','+p.lon.toFixed(6)).join(';'))+'&priority='+prio;
+    const r=await fetch(RTAPI+'?'+qs,{signal:ac.signal});let j=null;try{j=await r.json();}catch(e){}
+    if(!r.ok||!j||j.ok===false)throw new Error((j&&j.message)||('서버 응답 오류 ('+r.status+')'));
+    return j;
+  }finally{clearTimeout(to);}
+}
+async function rtRun(){
+  if(RT.busy||!IPPLAN)return;
+  const di=+$('#iprtday').value,prio=$('#iprtprio').value;RT.day=String(di);RT.prio=prio;
+  const info=rtPoints(di);
+  if(!info||info.pts.length<2){RT.msg='경로를 계산할 장소가 2곳 이상 필요해요.';RT.res=null;rtDraw();return;}
+  const my=++RT.seq;RT.busy=true;RT.msg='';$('#iprtgo').disabled=true;$('#iprtout').innerHTML='<span class="muted">도로 경로를 조회하는 중…</span>';
+  try{
+    const legs=[],lines=[];let toll=0;
+    for(let s=0;s<info.pts.length-1;){
+      const e=Math.min(s+6,info.pts.length-1),chunk=info.pts.slice(s,e+1);
+      const j=await rtFetch(chunk,prio);
+      if(my!==RT.seq)return;
+      (j.sections||[]).forEach((sc,k)=>{legs.push({from:chunk[k].n,to:chunk[k+1].n,d:sc.d,t:sc.t});});
+      if(j.line&&j.line.length>1)lines.push(j.line);toll+=j.toll||0;s=e;
+    }
+    if(my!==RT.seq)return;
+    RT.res={di:di,prio:prio,legs:legs,lines:lines,toll:toll,skipped:info.skipped,at:Date.now()};
+  }catch(e){
+    if(my!==RT.seq)return;
+    RT.res=null;RT.msg='경로를 불러오지 못했어요: '+(e.name==='AbortError'?'응답이 늦어요':(e instanceof TypeError?'네트워크 연결이나 서버 상태를 확인해주세요':e.message));
+  }finally{if(my===RT.seq){RT.busy=false;const b=$('#iprtgo');if(b)b.disabled=false;}}
+  if(my===RT.seq)rtDraw();
+}
+function rtDraw(){
+  const out=$('#iprtout');if(!out)return;
+  if(RT.layer){try{RT.layer.remove();}catch(e){}RT.layer=null;}
+  if(!RT.res){out.innerHTML=RT.msg?'<span class="'+(/못했|필요/.test(RT.msg)?'bad':'muted')+'">'+esc(RT.msg)+'</span>':'';return;}
+  const r=RT.res,td=r.legs.reduce((a,x)=>a+x.d,0),tt=r.legs.reduce((a,x)=>a+x.t,0);
+  const kst=new Date(r.at+9*3600000).toISOString().slice(11,16);
+  out.innerHTML='<div style="margin:6px 0"><b>'+(r.di+1)+'일차 · 총 '+esc(rtFmtD(td))+' · 이동 약 '+esc(rtFmtT(tt))+'</b> <span class="muted">(자동차, 조회 시점 교통 반영, '+kst+' 조회)</span></div>'
+   +'<div class="scroll" style="max-height:260px"><table><thead><tr><th>구간</th><th style="text-align:right">거리</th><th style="text-align:right">시간</th></tr></thead><tbody>'
+   +r.legs.map(x=>'<tr><td>'+esc(x.from)+' → '+esc(x.to)+'</td><td style="text-align:right;white-space:nowrap">'+esc(rtFmtD(x.d))+'</td><td style="text-align:right;white-space:nowrap">'+esc(rtFmtT(x.t))+'</td></tr>').join('')+'</tbody></table></div>'
+   +(r.toll>0?'<div class="muted" style="margin-top:4px">통행료 예상 '+r.toll.toLocaleString('ko-KR')+'원 (참고용)</div>':'')
+   +(r.skipped?'<div class="muted" style="margin-top:4px">같은 위치로 보이는 장소 '+r.skipped+'곳은 이동 구간에서 제외했어요.</div>':'');
+  try{
+    if(typeof L!=='undefined'&&IPMAP){RT.layer=L.layerGroup().addTo(IPMAP);const all=[];r.lines.forEach(ln=>{L.polyline(ln,{color:'#111827',weight:4,opacity:.85}).bindPopup('도로 경로(카카오내비 자동차 기준)').addTo(RT.layer);ln.forEach(p=>all.push(p));});if(all.length)IPMAP.fitBounds(all,{padding:[30,30],maxZoom:14});}
+  }catch(e){}
+}
+function rtAfterRender(){
+  if(!IPPLAN||!IPPLAN.days||!IPPLAN.days.length)return;
+  const hadRes=!!RT.res;RT.res=null;RT.layer=null;RT.seq++;RT.busy=false;
+  const mapCard=$('#ipmap')&&$('#ipmap').closest('.card');if(!mapCard)return;
+  const di=IPPLAN.days[+RT.day]?RT.day:'0';
+  mapCard.insertAdjacentHTML('afterend','<div class="card" id="iprtcard"><h4>실제 도로 경로·이동시간 <span class="tag" style="background:#eef4ff">자동차 · 실시간 조회</span></h4>'
+   +'<div class="row"><label class="muted">날짜 <select id="iprtday">'+IPPLAN.days.map((d,i)=>'<option value="'+i+'"'+(String(i)===di?' selected':'')+'>'+(i+1)+'일차 '+esc(d.date)+'</option>').join('')+'</select></label>'
+   +'<label class="muted">기준 <select id="iprtprio"><option value="RECOMMEND"'+(RT.prio==='RECOMMEND'?' selected':'')+'>추천 경로</option><option value="TIME"'+(RT.prio==='TIME'?' selected':'')+'>최단 시간</option><option value="DISTANCE"'+(RT.prio==='DISTANCE'?' selected':'')+'>최단 거리</option></select></label>'
+   +'<button class="b" id="iprtgo">도로 경로 조회</button></div>'
+   +'<div id="iprtout" class="muted">'+(hadRes?'일정이 바뀌어 이전 경로를 지웠어요. 다시 조회해주세요.':'기준 위치에서 그날의 장소를 순서대로 잇는 자동차 경로와 예상 이동시간을 조회해요.')+'</div>'
+   +'<div class="notice" style="margin-top:8px">자동차 경로만 계산해요(대중교통·도보 아님). 조회 시점의 교통을 반영한 예상값이라 출발 시각·정체·영업시간·주차는 반영하지 않아요.<br>카카오 정책에 맞춰 조회할 때마다 새로 가져오고, 저장 일정·JSON 백업·공유 요약에는 넣지 않아요. 일정을 바꾸면 경로가 지워져요.<br>경로·소요시간 출처: 카카오모빌리티(카카오내비)</div></div>');
+  $('#iprtgo').onclick=rtRun;
+}
+const ipRtPrevRender=ipRender;ipRender=function(){ipRtPrevRender();try{rtAfterRender();}catch(e){}};
 </script>
 </body>
 </html>
