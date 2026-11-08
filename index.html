@@ -3,25 +3,62 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>생활 API 허브 · 모두의 AI</title>
+<title>빵빵즈 생활 API 허브 · 우리 동네 소식</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{--bg:#f4f6fb;--card:#fff;--ink:#1c2333;--sub:#667085;--line:#e4e8f0;--pri:#2f5bea;--pri2:#e8eefe;--ok:#12a150;--bad:#d92d20;--warn:#f79009}
+:root{color-scheme:light;--bg:#fffbf4;--card:#fff;--ink:#422b35;--sub:#735761;--line:#efdbda;--pri:#a72f55;--pri2:#ffe9e4;--ok:#12a150;--bad:#d92d20;--warn:#f79009;--paper:#fffbf4;--muted:#735761;--pink:#a72f55}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.5}
-header{background:linear-gradient(135deg,#2f5bea,#6b8cff);color:#fff;padding:18px 16px 12px}
-.in{max-width:1100px;margin:0 auto}
-h1{margin:0;font-size:21px}
-header p{margin:2px 0 10px;opacity:.9;font-size:13px}
-nav{display:flex;gap:6px;flex-wrap:wrap}
-nav button{border:0;background:rgba(255,255,255,.18);color:#fff;padding:7px 13px;border-radius:20px;font-size:14px;cursor:pointer}
-nav button.on{background:#fff;color:var(--pri);font-weight:700}
-.fav{background:#fff;border-bottom:1px solid var(--line);padding:8px 16px}
-.fav .in{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif;line-height:1.55}
+button,a{font:inherit}button{cursor:pointer}
+a{color:var(--pink)}
+:focus-visible{outline:3px solid #a72f55;outline-offset:4px}
+[hidden]{display:none!important}
+.wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0;font-weight:800}
+.brand{display:flex;align-items:center;gap:8px;font-size:18px}
+.brand svg{width:35px;height:35px;flex:0 0 auto}
+.stamp{border:1px solid var(--line);background:#fff;padding:5px 12px;border-radius:100px;font-size:12px;color:var(--muted);font-weight:700}
+.hero{position:relative;isolation:isolate;display:grid;grid-template-columns:1fr 1fr;align-items:center;min-height:390px;padding:35px 44px;background:radial-gradient(#efb9b3 1px,transparent 1px) 0 0/19px 19px,#ffe9e4;border:1px solid #f3cbc6;border-radius:36px;overflow:hidden;box-shadow:0 7px 0 #f7dbd2;margin-bottom:28px}
+.hero:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,#ffe9e4 26%,transparent 72%)}
+.eyebrow{font-size:12px;font-weight:800;color:#8e3150;letter-spacing:.16em}
+.hero h1{font-size:clamp(36px,5.3vw,69px);line-height:1.15;letter-spacing:-.09em;margin:12px 0 15px}
+.hero h1 em{font-style:normal;color:var(--pink)}
+.hero p{color:var(--muted);margin:0 0 22px}
+.cta{display:inline-block;background:#a72f55;color:#fff;text-decoration:none;padding:10px 19px;border-radius:99px;font-weight:800;box-shadow:0 4px 0 #79213b;border:0}
+.stage{position:relative;min-width:0;min-height:310px}
+.stage:before{content:"";position:absolute;inset:24px 8px 14px;border-radius:50%;background:#fff5dc;border:2px dashed #eeb99f;transform:rotate(-7deg)}
+.sticker{position:absolute;width:28%;text-align:center;transition:transform .2s;transform:rotate(var(--tilt))}
+.sticker:hover{transform:rotate(0) translateY(-6px)}
+.sticker svg{display:block;width:100%;filter:drop-shadow(0 3px 1px #7a455122)}
+.sticker span{display:inline-block;background:#fffdf6;border:1px solid #f1c6bb;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:800;white-space:nowrap}
+.s0{width:34%;left:33%;top:19%;z-index:2;--tilt:-6deg}
+.s1{left:5%;top:7%;--tilt:-13deg}
+.s2{right:4%;top:5%;--tilt:10deg}
+.s3{left:9%;bottom:1%;--tilt:8deg}
+.s4{right:7%;bottom:1%;--tilt:-9deg}
+.s5{left:37%;bottom:-2%;width:23%;--tilt:5deg;z-index:3}
+.spark{position:absolute;color:#ad4562;font-size:27px;left:45%;top:1%;transform:rotate(16deg)}
+.town{margin:0 0 22px}
+.heading{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:13px}
+.heading h2{margin:0;font-size:25px;letter-spacing:-.05em}
+.hint{font-size:13px;color:var(--muted)}
+.groups{display:grid;gap:12px;grid-template-columns:repeat(5,minmax(0,1fr))}
+.group{display:flex;flex-direction:column;align-items:center;gap:4px;min-height:115px;background:var(--tint);border:1px solid var(--line);border-radius:20px;color:var(--ink);padding:7px 8px 12px;font-weight:800}
+.group svg{width:64px;height:58px}
+.group[aria-pressed=true]{outline:2px solid var(--pink);outline-offset:-2px}
+.group:focus-visible{outline-offset:3px}
+#nav.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;padding:13px;border:1px dashed #e8c4be;border-radius:16px;background:transparent}
+#nav.tabs button{padding:7px 12px;background:white;border:1px solid var(--line);border-radius:99px;color:var(--ink);font-size:14px}
+#nav.tabs button.on,#nav.tabs button[aria-pressed=true]{background:#a72f55;color:#fff;border-color:#a72f55;font-weight:700}
+.fav{background:transparent;border-bottom:0;padding:0 0 14px}
+.fav .in{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#f7edff;border:1px solid #ead9f3;padding:11px 16px;border-radius:14px;font-size:13px}
 .chip{border:1px solid var(--line);background:#fff;border-radius:16px;padding:4px 10px;font-size:13px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
 .chip.on{background:var(--pri2);border-color:var(--pri);color:var(--pri);font-weight:600}
 .chip i{font-style:normal;color:var(--sub);font-size:12px}
-main{max-width:1100px;margin:0 auto;padding:14px 16px}
+main{max-width:none;margin:0;padding:0 0 14px}
+.in{max-width:none;margin:0}
+h1{margin:0;font-size:21px}
+header p{margin:2px 0 10px;opacity:.9;font-size:13px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 select,input{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;max-width:100%}
 button.b{font:inherit;padding:7px 12px;border:1px solid var(--pri);border-radius:8px;background:var(--pri);color:#fff;cursor:pointer}
@@ -53,7 +90,7 @@ pre{background:#0f172a;color:#d1e0ff;padding:12px;border-radius:10px;overflow:au
 .ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
 .muted{color:var(--sub);font-size:12px}
 .aqi1{color:#12a150}.aqi2{color:#65a30d}.aqi3{color:#f79009}.aqi4{color:#ea580c}.aqi5{color:#d92d20}
-footer{max-width:1100px;margin:0 auto;padding:0 16px 28px;color:var(--sub);font-size:12px}
+footer{max-width:none;margin:0;padding:19px 0 28px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
 .up{color:#d92d20}.dn{color:#2563eb}.flat{color:var(--sub)}
 .mkt td.num,.mkt th.num{text-align:right;white-space:nowrap}
 .mkt tr.sel td{background:var(--pri2)}
@@ -96,17 +133,51 @@ a{color:var(--pri)}
 .msg.u{background:var(--pri);color:#fff;margin-left:auto}
 .msg.a{background:#f1f4fb}
 .msg small{display:block;color:var(--sub);margin-top:4px;font-size:11px}
+footer{max-width:none;margin:0;padding:19px 0 28px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+@media(max-width:740px){.hero{grid-template-columns:1fr;padding:24px;gap:15px}.stage{width:min(400px,100%);min-height:280px;margin:auto}.sticker{max-width:105px}.s0{max-width:130px}.groups{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:420px){.wrap{width:calc(100% - 24px)}.stage{min-height:230px}.heading{flex-wrap:wrap}.hero{border-radius:24px}.group{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.sticker{transition:none}.sticker:hover{transform:rotate(var(--tilt))}}
+
 </style>
 </head>
 <body>
-<header><div class="in">
-  <h1>생활 API 허브</h1>
-  <p>모두의 AI 실험실 디지털융합플랫폼 API를 n8n 게이트웨이로 모아서 보여줘요</p>
-  <nav id="nav"></nav>
-</div></header>
+<div class="wrap">
+<header class="top">
+  <div class="brand"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="M26 44C13 36 16 15 38 13h44c22 2 25 23 12 31v44q0 12-12 12H38q-12 0-12-12z" fill="#f6b473"/><path d="M33 47c-12-9-7-25 7-25h40c14 0 19 16 7 25v39q0 7-8 7H41q-8 0-8-7z" fill="#fff0d0" stroke="none"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74q2 5 6 1 4 4 6-1" fill="none"/></g></svg> 빵빵즈 생활 API 허브</div>
+  <span class="stamp">우리 동네 소식</span>
+</header>
+
+<div class="hero">
+  <div>
+    <div class="eyebrow">BBANG BBANGS · 우리 동네 소식</div>
+    <h1>오늘도 반가워,<br><em>빵빵마을!</em></h1>
+    <p id="greeting">빵빵즈 친구들이 오늘의 동네 소식을 모았어요.</p>
+    <button type="button" class="cta" id="ctaToday">오늘 소식 보기 ↓</button>
+  </div>
+  <div class="stage" aria-hidden="true"><span class="spark">✦</span>
+    <div class="sticker s0"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="M26 44C13 36 16 15 38 13h44c22 2 25 23 12 31v44q0 12-12 12H38q-12 0-12-12z" fill="#f6b473"/><path d="M33 47c-12-9-7-25 7-25h40c14 0 19 16 7 25v39q0 7-8 7H41q-8 0-8-7z" fill="#fff0d0" stroke="none"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74q2 5 6 1 4 4 6-1" fill="none"/></g></svg><span>식빵이</span></div>
+    <div class="sticker s1"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="43" cy="35" rx="13" ry="25" transform="rotate(-15 43 35)" fill="#f5adc6"/><ellipse cx="77" cy="35" rx="13" ry="25" transform="rotate(15 77 35)" fill="#f5adc6"/><ellipse cx="60" cy="72" rx="41" ry="28" fill="#fff1f6"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74q2 5 6 1 4 4 6-1" fill="none"/></g></svg><span>딸기토끼</span></div>
+    <div class="sticker s2"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><circle cx="29" cy="44" r="15" fill="#b1dabb"/><circle cx="91" cy="44" r="15" fill="#b1dabb"/><ellipse cx="60" cy="69" rx="40" ry="31" fill="#b1dabb"/><ellipse cx="60" cy="79" rx="16" ry="12" fill="#e8f6dc" stroke="none"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74q2 5 6 1 4 4 6-1" fill="none"/></g></svg><span>쑥곰이</span></div>
+    <div class="sticker s3"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="M19 80Q7 94 28 93h65q23 0 9-13C101 30 22 30 19 80Z" fill="#a7c9f7"/><path d="M53 43q7-22 21-16 3 8-10 17" fill="#e7f2ff"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74q2 5 6 1 4 4 6-1" fill="none"/></g></svg><span>소라물범</span></div>
+    <div class="sticker s4"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="M22 70 25 25q3-6 25 17h22q22-22 25-16l1 44c0 40-76 40-76 0Z" fill="#d0b8f0"/><path d="m60 44 2 5 6 1-5 4 1 6-4-3-5 3 1-6-4-4 6-1z" fill="#fff4ac" stroke="none"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74q2 5 6 1 4 4 6-1" fill="none"/></g></svg><span>밤별냥</span></div>
+    <div class="sticker s5"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="M22 73c0-22 17-45 38-45s38 23 38 45q0 28-38 28T22 73Z" fill="#ffd572"/><path d="M55 29q-8-15 1-13 5 1 6 10 7-15 13-9 3 6-10 12" fill="#ffd572"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74h12l-6 6Z" fill="#ee9c56"/></g></svg><span>달걀삐</span></div>
+  </div>
+</div>
+
+<section class="town" aria-labelledby="town">
+  <div class="heading"><h2 id="town">어디부터 놀러 갈까?</h2><span class="hint">마을을 고르면 관련 메뉴가 펼쳐져요</span></div>
+  <div class="groups" id="groups" role="group" aria-label="마을 선택">
+    <button type="button" class="group" style="--tint:#fff0d0" data-group="0" aria-controls="nav" aria-pressed="true"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="M26 44C13 36 16 15 38 13h44c22 2 25 23 12 31v44q0 12-12 12H38q-12 0-12-12z" fill="#f6b473"/><path d="M33 47c-12-9-7-25 7-25h40c14 0 19 16 7 25v39q0 7-8 7H41q-8 0-8-7z" fill="#fff0d0" stroke="none"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74q2 5 6 1 4 4 6-1" fill="none"/></g></svg>동네 한 바퀴</button>
+    <button type="button" class="group" style="--tint:#fff1f6" data-group="1" aria-controls="nav" aria-pressed="false"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="43" cy="35" rx="13" ry="25" transform="rotate(-15 43 35)" fill="#f5adc6"/><ellipse cx="77" cy="35" rx="13" ry="25" transform="rotate(15 77 35)" fill="#f5adc6"/><ellipse cx="60" cy="72" rx="41" ry="28" fill="#fff1f6"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74q2 5 6 1 4 4 6-1" fill="none"/></g></svg>소풍 가는 날</button>
+    <button type="button" class="group" style="--tint:#e8f6dc" data-group="2" aria-controls="nav" aria-pressed="false"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><circle cx="29" cy="44" r="15" fill="#b1dabb"/><circle cx="91" cy="44" r="15" fill="#b1dabb"/><ellipse cx="60" cy="69" rx="40" ry="31" fill="#b1dabb"/><ellipse cx="60" cy="79" rx="16" ry="12" fill="#e8f6dc" stroke="none"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74q2 5 6 1 4 4 6-1" fill="none"/></g></svg>든든한 하루</button>
+    <button type="button" class="group" style="--tint:#e7f2ff" data-group="3" aria-controls="nav" aria-pressed="false"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="M19 80Q7 94 28 93h65q23 0 9-13C101 30 22 30 19 80Z" fill="#a7c9f7"/><path d="M53 43q7-22 21-16 3 8-10 17" fill="#e7f2ff"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74q2 5 6 1 4 4 6-1" fill="none"/></g></svg>쉬어가는 시간</button>
+    <button type="button" class="group" style="--tint:#f5eaff" data-group="4" aria-controls="nav" aria-pressed="false"><svg viewBox="0 0 120 115" aria-hidden="true"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#70433d" opacity=".12"/><g stroke="#70433d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="M22 70 25 25q3-6 25 17h22q22-22 25-16l1 44c0 40-76 40-76 0Z" fill="#d0b8f0"/><path d="m60 44 2 5 6 1-5 4 1 6-4-3-5 3 1-6-4-4 6-1z" fill="#fff4ac" stroke="none"/><g stroke="none"><ellipse cx="34" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="86" cy="76" rx="7" ry="4" fill="#ed8594" opacity=".75"/><ellipse cx="45" cy="68" rx="3" ry="4" fill="#593b37"/><ellipse cx="75" cy="68" rx="3" ry="4" fill="#593b37"/></g><path d="M54 74q2 5 6 1 4 4 6-1" fill="none"/></g></svg>호기심 공방</button>
+  </div>
+  <nav class="tabs" id="nav" aria-label="메뉴"></nav>
+</section>
 
 <div class="fav"><div class="in">
-  <b style="font-size:13px">내 지역</b>
+  <b style="font-size:13px">📍 내 지역</b>
   <span id="favs"></span>
   <button class="chip" id="saveFav">⭐ 현재 위치 저장</button>
   <input id="q" placeholder="지역·장소 검색 (예: 서울역, 해운대)" style="min-width:210px">
@@ -510,7 +581,8 @@ a{color:var(--pri)}
 
   <section id="v-cat" class="hide"><div id="catBox"></div></section>
 </main>
-<footer>데이터 출처: 디지털융합플랫폼(koreaconnect.kr) 제공 오픈API (OpenWeather, 기상청, ODsay, 인천국제공항공사, 한국공항공사, 식약처, 건강보험심사평가원, 한국관광공사, 부산시, 산림청, 고속도로 공공데이터포털), 서울 문화행사는 서울특별시 공공데이터(서울 열린데이터광장, 서울문화포털), 공연 정보는 (재)예술경영지원센터 공연예술통합전산망(www.kopis.or.kr), 축제·행사·숙박은 한국관광공사 국문 관광정보 서비스(TourAPI), 캠핑장은 한국관광공사 고캠핑, 걷기 길은 한국관광공사 두루누비, 다이소 재고는 비공식 서비스 다이소 파인더(daiso-finder.kr), 가상자산 시세는 업비트 Open API·빗썸 Open API, 밤하늘 별자리 지도는 오픈소스 VirtualSky(LCO)로 계산한 모습이고 하늘 카메라는 한국천문연구원(코스모스 허브)에서 보여주며, 힐링 바다 영상 링크는 해양수산부 연안포털·바다타임(KBS 재난안전포털)·위크서프·유튜브 각 채널(영상은 연결만 하며 각 제공처 소유), 서울 주요 장소 실시간 혼잡·교통·날씨는 서울특별시 공공데이터(서울 열린데이터광장·서울 실시간 도시데이터), 생필품 조사 가격은 한국소비자원 참가격, 수돗물 수질은 한국수자원공사, 자동차 경로·이동시간은 카카오모빌리티(카카오내비), 지도 © OpenStreetMap contributors, 위성 © Esri, 장소 검색 Nominatim. 인증키는 서버(n8n)에만 있고 이 페이지에는 없어요. 내 지역은 이 브라우저에 자동 저장돼요.</footer>
+<footer class="site-foot">데이터 출처: 디지털융합플랫폼(koreaconnect.kr) 제공 오픈API (OpenWeather, 기상청, ODsay, 인천국제공항공사, 한국공항공사, 식약처, 건강보험심사평가원, 한국관광공사, 부산시, 산림청, 고속도로 공공데이터포털), 서울 문화행사는 서울특별시 공공데이터(서울 열린데이터광장, 서울문화포털), 공연 정보는 (재)예술경영지원센터 공연예술통합전산망(www.kopis.or.kr), 축제·행사·숙박은 한국관광공사 국문 관광정보 서비스(TourAPI), 캠핑장은 한국관광공사 고캠핑, 걷기 길은 한국관광공사 두루누비, 다이소 재고는 비공식 서비스 다이소 파인더(daiso-finder.kr), 가상자산 시세는 업비트 Open API·빗썸 Open API, 밤하늘 별자리 지도는 오픈소스 VirtualSky(LCO)로 계산한 모습이고 하늘 카메라는 한국천문연구원(코스모스 허브)에서 보여주며, 힐링 바다 영상 링크는 해양수산부 연안포털·바다타임(KBS 재난안전포털)·위크서프·유튜브 각 채널(영상은 연결만 하며 각 제공처 소유), 서울 주요 장소 실시간 혼잡·교통·날씨는 서울특별시 공공데이터(서울 열린데이터광장·서울 실시간 도시데이터), 생필품 조사 가격은 한국소비자원 참가격, 수돗물 수질은 한국수자원공사, 자동차 경로·이동시간은 카카오모빌리티(카카오내비), 지도 © OpenStreetMap contributors, 위성 © Esri, 장소 검색 Nominatim. 인증키는 서버(n8n)에만 있고 이 페이지에는 없어요. 내 지역은 이 브라우저에 자동 저장돼요.</footer>
+</div><!-- /.wrap -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -1826,10 +1898,42 @@ const ipOrderPreviousRender=ipRender;ipRender=function(){ipOrderPreviousRender()
 const ipOrderPreviousInit=ipEnhanceInit;ipEnhanceInit=function(){ipOrderPreviousInit();ipOrderRender();};
 const ipOrderPreviousSync=ipXSync;ipXSync=function(data){IPORDERUNDO=null;IPORDERNOTICE='';ipOrderPreviousSync(data);};
 
+const TOWN_GROUPS = [
+  {id:0, tabs:['today','seoul','map','route','safety']},
+  {id:1, tabs:['trip','air','culture']},
+  {id:2, tabs:['health','shop','market']},
+  {id:3, tabs:['sea','sky']},
+  {id:4, tabs:['ai','cat','play']}
+];
+const GREETINGS = [
+  '식빵이가 동네 소식을 갓 구워 왔어요.',
+  '딸기토끼가 소풍 갈 곳을 찾고 있어요.',
+  '쑥곰이가 오늘도 잘 챙겨 먹었냐고 물어요.',
+  '소라물범이 파도 소리를 들려주러 왔어요.',
+  '밤별냥이 별빛을 한 움큼 가져왔어요.',
+  '달걀삐가 오늘의 날씨를 살펴봤어요.'
+];
+function setGreeting(){
+  const parts = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const day = Number(parts.find(p => p.type === 'day').value);
+  const el = document.querySelector('#greeting');
+  if (el) el.textContent = GREETINGS[(day - 1) % GREETINGS.length];
+}
+function syncTown(v){
+  const g = TOWN_GROUPS.find(x => x.tabs.includes(v)) || TOWN_GROUPS[0];
+  document.querySelectorAll('#groups .group').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.group === g.id)));
+  document.querySelectorAll('#nav button[data-v]').forEach(b => {
+    const visible = g.tabs.includes(b.dataset.v);
+    b.hidden = !visible;
+    const on = b.dataset.v === v;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
+}
 function show(v) {
   view = v;
   TABS.forEach(t => $('#v-' + t[0]).classList.toggle('hide', t[0] !== v));
-  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  syncTown(v);
   refresh();
 }
 function refresh() {
@@ -1850,8 +1954,16 @@ function refresh() {
 }
 (async function init() {
   loadState(); renderFavs();
-  $('#nav').innerHTML = TABS.map(([v, t]) => '<button data-v="' + v + '">' + t + '</button>').join('');
-  document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.v));
+  setGreeting();
+  $('#nav').innerHTML = TABS.map(([v, t]) => '<button type="button" data-v="' + v + '" aria-pressed="false">' + t + '</button>').join('');
+  document.querySelectorAll('#nav button[data-v]').forEach(b => b.onclick = () => show(b.dataset.v));
+  document.querySelectorAll('#groups .group').forEach(btn => btn.onclick = () => {
+    const g = TOWN_GROUPS.find(x => x.id === +btn.dataset.group) || TOWN_GROUPS[0];
+    const next = g.tabs.includes(view) ? view : g.tabs[0];
+    show(next);
+  });
+  const cta = $('#ctaToday');
+  if (cta) cta.onclick = () => { show('today'); const t = $('#v-today'); if (t) t.scrollIntoView({behavior:'smooth', block:'start'}); };
   $('#saveFav').onclick = () => { const n = prompt('저장할 이름', pos.name === '지도 선택' || pos.name === '내 위치' ? '' : pos.name); if (!n) return; favs = favs.filter(f => f.n !== n); favs.push({n, lat: +pos.lat, lon: +pos.lon}); pos.name = n; saveState(); renderFavs(); };
   const doQ = async () => { const q = $('#q').value.trim(); if (!q) return; $('#qres').innerHTML = '<span class="muted">검색 중…</span>'; try { const g = await geocode(q); window._g = g; $('#qres').innerHTML = g.length ? g.map((x, i) => '<span class="chip" onclick="pickG(' + i + ')">' + esc(x.name) + ' <i>' + esc(x.full.split(',').slice(-4, -1).join(',').trim()) + '</i></span>').join(' ') : '<span class="muted">검색 결과가 없어요</span>'; } catch (e) { $('#qres').innerHTML = fail('검색 실패: ' + e.message); } };
   window.pickG = i => { const g = window._g[i]; $('#qres').innerHTML = ''; $('#q').value = ''; setPos({lat: g.lat, lon: g.lon, name: g.name}); };
