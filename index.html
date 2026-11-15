@@ -189,6 +189,7 @@ footer{max-width:none;margin:0;padding:19px 0 28px;color:var(--muted);font-size:
 
 <main>
   <section id="v-today">
+    <div id="fp-today"></div>
     <div class="grid" id="dash"></div>
   </section>
 
@@ -1945,9 +1946,21 @@ function show(v) {
   syncTown(v);
   refresh();
 }
+// 여행 발자취 요약 카드 (같은 도메인의 발자취 저장소를 읽기만 해요)
+async function fpReadTrips(){try{if(!indexedDB.databases)return null;const name=window.FP_DB_HUB||'travel-footprints';const dbs=await indexedDB.databases();if(!dbs.some(d=>d.name===name))return [];return await new Promise((res,rej)=>{const r=indexedDB.open(name);r.onupgradeneeded=()=>{try{r.transaction.abort();}catch(e){}res([]);};r.onerror=()=>rej(r.error);r.onsuccess=()=>{const db=r.result;try{if(!db.objectStoreNames.contains('trips')){db.close();return res([]);}const q=db.transaction('trips').objectStore('trips').getAll();q.onsuccess=()=>{db.close();res(q.result||[]);};q.onerror=()=>{db.close();rej(q.error);};}catch(e){db.close();res([]);}};});}catch(e){return null;}}
+function fpDays(t){const out=[];if(!t.start)return out;const s=new Date(t.start+'T00:00:00Z'),e=new Date((t.end&&t.end>=t.start?t.end:t.start)+'T00:00:00Z');for(let d=new Date(s),i=0;d<=e&&i<400;d.setUTCDate(d.getUTCDate()+1),i++)out.push(d.toISOString().slice(0,10));return out;}
+const fpFlag=c=>/^[A-Z]{2}$/.test(c)?String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt(0))):'';
+async function renderFpToday(){const el=$('#fp-today');if(!el)return;const trips=await fpReadTrips();if(trips===null){el.innerHTML='';return;}
+ const open='<button type="button" class="b" data-fp-open>여행 발자취 열기</button>';
+ if(!trips.length){el.innerHTML='<div class="card" style="margin-bottom:12px"><span class="tag">여행 발자취</span><h3>👣 여행 발자취</h3><p class="muted">여행의 사진·메모를 남기고, 다녀온 나라를 세계 지도에 색칠해 보세요.</p>'+open+'</div>';el.querySelectorAll('[data-fp-open]').forEach(b=>b.onclick=()=>show('footprints'));return;}
+ const now=new Date(),mem=[],seen=new Set();for(let k=0;k<=7;k++){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+k);const m2=String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');for(const t of trips){if(seen.has(t.id))continue;const hit=fpDays(t).find(x=>x.slice(5)===m2&&+x.slice(0,4)<d.getFullYear());if(hit){seen.add(t.id);mem.push({k,t,years:d.getFullYear()-+hit.slice(0,4)});}}}
+ const cnt={};trips.forEach(t=>(t.countries||[]).forEach(c=>cnt[c]=(cnt[c]||0)+1));const cs=Object.keys(cnt).filter(c=>/^[A-Z]{2}$/.test(c)).sort((a,b)=>cnt[b]-cnt[a]);const last=[...trips].sort((a,b)=>String(b.start).localeCompare(String(a.start)))[0];const dn=new Intl.DisplayNames(['ko'],{type:'region'});
+ const memHtml=mem.map(x=>(x.k?x.k+'일 뒤 '+x.years+'주년':'오늘 · '+x.years+'년 전')+' 「'+esc(x.t.title)+'」').join('<br>');
+ el.innerHTML='<div class="card" style="margin-bottom:12px"><span class="tag">여행 발자취</span><h3>👣 다녀온 나라 '+Object.keys(cnt).length+'곳 · 여행 '+trips.length+'회</h3>'+(cs.length?'<p style="font-size:22px;margin:4px 0">'+cs.slice(0,12).map(c=>'<span title="'+esc(dn.of(c))+'">'+fpFlag(c)+'</span>').join(' ')+'</p>':'')+(mem.length?'<p style="margin:6px 0">📅 <b>추억</b><br>'+memHtml+'</p>':'')+'<p class="muted" style="margin:4px 0 8px">마지막 여행: '+esc(last.title)+' ('+esc(last.start)+')</p>'+open+'</div>';
+ el.querySelectorAll('[data-fp-open]').forEach(b=>b.onclick=()=>show('footprints'));}
 function refresh() {
   if (view === 'mobility') { const u = 'mobility.html?' + new URLSearchParams({lat:pos.lat,lon:pos.lon,name:pos.name}); const f = document.getElementById('mobility-frame'); if (f.getAttribute('src') !== u) f.setAttribute('src',u); }
-  else if (view === 'today') loadToday();
+  else if (view === 'today') { loadToday(); renderFpToday(); }
   else if (view === 'map') loadMap();
   else if (view === 'health') { loadPharm(); if (!LOADED.health) { LOADED.health = 1; searchDrug(); searchFood(); } }
   else if (view === 'trip') { if(IPMAP)setTimeout(()=>IPMAP?.invalidateSize(),60); ipWhere(); loadTrip(); if (!LOADED.trip) { LOADED.trip = 1; searchMt(); } if (!initTravel() && TCMODE === 'near') tcLoad('near'); }
