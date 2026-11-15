@@ -568,7 +568,7 @@ footer{max-width:none;margin:0;padding:19px 0 28px;color:var(--muted);font-size:
       <div id="chat" style="min-height:120px;max-height:460px;overflow:auto;margin-bottom:10px"></div>
       <div class="row" id="aichips"></div>
       <div class="row"><input id="aiq" placeholder="예: 오늘 우산 필요해? / 서울역에서 강남역 가는 법 / 게보린 먹어도 돼?" style="flex:1;min-width:240px" maxlength="200"><button class="b" id="aigo">물어보기</button></div>
-      <div class="muted">OpenRouter 무료 모델이 허브 API 데이터를 읽고 답해요. 느리거나 가끔 실패할 수 있고, 약·건강 답변은 참고용이에요. 분당 6회, 하루 300개까지 질문할 수 있어요.</div>
+      <div class="muted">OpenRouter 무료 모델이 허브 API 데이터를 읽고 답해요. 느리거나 가끔 실패할 수 있고, 약·건강 답변은 참고용이에요. 분당 6회, 하루 300개까지 질문할 수 있어요. 「작년 여름에 어디 갔지?」처럼 내 여행 발자취 기록을 묻는 질문은 이 기기 안에서만 계산해서 답하고, AI 서버로 보내지 않아요.</div>
     </div>
   </section>
 
@@ -905,12 +905,73 @@ function initSafety() {
   $('#termgo').onclick = loadTerm; $('#termq').onkeydown = e => { if (e.key === 'Enter') loadTerm(); };
 }
 
+// ---------- AI 비서: 내 여행 발자취 질문 (이 기기 안에서만 답해요) ----------
+const FP_KR = {'11':'서울','21':'부산','22':'대구','23':'인천','24':'광주','25':'대전','26':'울산','29':'세종','31':'경기','32':'강원','33':'충북','34':'충남','35':'전북','36':'전남','37':'경북','38':'경남','39':'제주'};
+let FP_CN = null, FP_ADM = null;
+function fpCountryNames() { if (FP_CN) return FP_CN; const dn = new Intl.DisplayNames(['ko'], {type: 'region'}); const m = []; const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; for (const a of A) for (const b of A) { const c = a + b; let n = ''; try { n = dn.of(c); } catch (e) {} if (n && n !== c && n.length >= 2) m.push([n, c]); } m.push(['한국', 'KR'], ['국내', 'KR'], ['우리나라', 'KR']); m.sort((x, y) => y[0].length - x[0].length); return FP_CN = m; }
+async function fpAdminNames() { if (FP_ADM) return FP_ADM; if (!window.ADMIN) await new Promise(res => { const s = document.createElement('script'); s.src = 'footprints-admin.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); setTimeout(res, 4000); }); const m = []; Object.values(window.ADMIN || {}).forEach(a => a.items.forEach(i => { if (/[가-힣]/.test(i.n) && i.n.length >= 2) m.push([i.n, i.c]); })); m.sort((x, y) => y[0].length - x[0].length); return FP_ADM = m; }
+const FP_STOP = new Set(['어디','언제','갔','갔지','갔어','갔었','다녀','다녀온','다녀왔','여행','여행했','몇','번','회','기록','내','나','우리','가장','제일','많이','마지막','최근','처음','첫','알려줘','알려','보여줘','뭐','무엇','어떤','있어','있었','했어','했지','했던','이','그','저','때','날','곳','나라','개국','방문','방문했','사진','찍은','먹었','먹은','한','해','줘','좀','다시','이번','지난','작년','올해','재작년','금년','봄','여름','가을','겨울','에서','에는','에도','으로']);
+function fpRange(t) { const s = t.start.replace(/-/g, '.'); if (!t.end || t.end === t.start) return s; return s + '~' + (t.end.slice(0, 7) === t.start.slice(0, 7) ? t.end.slice(8) : t.end.slice(5).replace('-', '.')); }
+async function travelAnswer(q) {
+  const strong = /(다녀|갔(었|던|지|어|나|는|다)|(^|\s)간\s*(나라|곳|적|여행|날)|가봤|가본|방문했|내 여행|여행 기록|발자취|추억|여행.{0,8}(언제|어디|몇|많이|길|처음|첫|마지막|최근)|(처음|첫|마지막|최근|가장 길|가장 많이).{0,6}여행|여행했|몇\s*(개국|나라)|몇\s*(번|회)\s*(갔|다녀|여행))/.test(q);
+  const weak = /(먹었|뭐 했|뭘 했|무슨 일|(사진).{0,6}(몇|얼마)|몇\s*장)/.test(q);
+  if (!strong && !weak) return null;
+  const trips = await fpReadTrips(); if (trips === null) return null;
+  if (!trips.length) return '여행 발자취에 아직 기록이 없어요. 「소풍 가는 날 → 여행 발자취」에서 첫 여행을 남기면 여기서 물어볼 수 있어요.';
+  const now = new Date(), Y = now.getFullYear(); let rest = q; const cond = [];
+  let yearF = null, months = null;
+  const ym = rest.match(/(20\d\d)\s*년?/); if (ym) { yearF = +ym[1]; rest = rest.replace(ym[0], ' '); }
+  const ago = rest.match(/(\d+)\s*년\s*전/); if (!ym && ago) { yearF = Y - +ago[1]; rest = rest.replace(ago[0], ' '); }
+  else if (!ym && /재작년/.test(rest)) { yearF = Y - 2; rest = rest.replace('재작년', ' '); }
+  else if (!ym && /작년|지난해|전년/.test(rest)) { yearF = Y - 1; rest = rest.replace(/작년|지난해|전년/, ' '); }
+  else if (!ym && /올해|금년|올\s/.test(rest)) { yearF = Y; rest = rest.replace(/올해|금년|올\s/, ' '); }
+  const seas = [['봄', [3, 4, 5]], ['여름', [6, 7, 8]], ['가을', [9, 10, 11]], ['겨울', [12, 1, 2]]]; let seasonName = '';
+  for (const [n, ms] of seas) if (rest.includes(n)) { months = ms; seasonName = n; rest = rest.replace(n, ' '); break; }
+  const mm = rest.match(/(\d{1,2})\s*월/); if (!months && mm && +mm[1] >= 1 && +mm[1] <= 12) { months = [+mm[1]]; seasonName = mm[1] + '월'; rest = rest.replace(mm[0], ' '); }
+  if (!months && /지난\s*달/.test(rest)) { const d = new Date(Y, now.getMonth() - 1, 1); months = [d.getMonth() + 1]; yearF = d.getFullYear(); seasonName = '지난달'; rest = rest.replace(/지난\s*달/, ' '); }
+  if (!months && /이번\s*달/.test(rest)) { months = [now.getMonth() + 1]; yearF = Y; seasonName = '이번 달'; rest = rest.replace(/이번\s*달/, ' '); }
+  if (yearF !== null) cond.push(yearF + '년'); if (seasonName) cond.push(seasonName);
+  let list = trips.filter(t => t.start && (yearF === null || (seasonName === '겨울' ? +t.start.slice(0, 4) === yearF || (+t.start.slice(5, 7) === 12 && +t.start.slice(0, 4) === yearF) : +t.start.slice(0, 4) === yearF)) && (!months || months.includes(+t.start.slice(5, 7))));
+  // 장소: 나라 / 국내 시·도 / 해외 세부 지역
+  let cc = null, rg = null, ad = null;
+  for (const [n, c] of fpCountryNames()) if (rest.includes(n)) { cc = c; rest = rest.replace(n, ' '); cond.push(n); break; }
+  if (!cc) for (const [c, n] of Object.entries(FP_KR)) if (rest.includes(n)) { rg = c; cc = 'KR'; rest = rest.replace(n, ' '); cond.push(n); break; }
+  const admNames = await fpAdminNames(); for (const [n, c] of admNames) if (rest.includes(n) && !FP_STOP.has(n)) { ad = c; rest = rest.replace(n, ' '); cond.push(n); break; }
+  if (ad) list = list.filter(t => (t.admin || []).includes(ad)); else if (rg) list = list.filter(t => (t.regions || []).includes(rg)); else if (cc) list = list.filter(t => (t.countries || []).includes(cc));
+  // 남은 낱말은 제목·장소·메모에서 찾기
+  const toks = rest.split(/[^가-힣A-Za-z0-9#]+/).map(w => w.replace(/(에서|에는|에도|으로|이랑|랑|하고|와|과|에|은|는|이|가|을|를|도|의|로)$/, '')).filter(w => w.length >= 2 && !FP_STOP.has(w) && !/^(몇|번|회)$/.test(w) && !/(다녀|갔|왔|언제|어디|였어|이야|했어|있어|있었|가본|가봤|먹었|몇|궁금|알려|보여|길었|뭐야|찍었|많|가장|제일|간$)/.test(w));
+  const text = t => [t.title, t.place, t.memo, ...Object.values(t.dayMemos || {}), ...(t.themes || [])].join(' ').toLowerCase();
+  let textNote = ''; if (toks.length) { const f = list.filter(t => toks.every(k => text(t).includes(k.toLowerCase().replace(/^#/, '')))); if (f.length) { list = f; cond.push(toks.join(' ')); } else textNote = '「' + toks.join(' ') + '」가 들어간 기록은 못 찾아서 그 단어는 빼고 찾았어요. '; }
+  if (!strong && !cond.length) return null;
+  const yn = /적\s*(있|없)|가봤|가본 적|갔었어/.test(q);
+  const label = cond.length ? cond.join(' · ') + ' 기준' : '전체 기록 기준';
+  if (!list.length) return yn ? '아니요, ' + label + '으로는 다녀온 기록이 없어요.' : label + '으로 찾아봤지만 해당하는 여행 기록이 없어요.' + (textNote ? ' ' + textNote : '');
+  const sorted = [...list].sort((a, b) => b.start.localeCompare(a.start)); const dn = new Intl.DisplayNames(['ko'], {type: 'region'});
+  const cname = c => { try { return dn.of(c); } catch (e) { return c; } };
+  const where = t => (t.countries || []).map(cname).join('·') + ((t.regions || []).length ? '(' + t.regions.map(r => FP_KR[r] || r).join('·') + ')' : '');
+  const line = t => '• ' + fpRange(t) + ' · ' + t.title + (where(t) ? ' — ' + where(t) : '');
+  const days = new Set(); list.forEach(t => fpDays(t).forEach(d => days.add(d)));
+  const cs = {}; list.forEach(t => (t.countries || []).forEach(c => cs[c] = (cs[c] || 0) + 1));
+  const head = label + '으로 찾았어요.\n' + textNote;
+  if (yn) return '네, 다녀온 기록이 있어요 (' + list.length + '번).\n' + sorted.slice(0, 5).map(line).join('\n');
+  if (/처음|첫|가장 오래된/.test(q)) { const t = [...list].sort((a, b) => a.start.localeCompare(b.start))[0]; return head + '\n첫 여행은 ' + fpRange(t) + '의 「' + t.title + '」(' + where(t) + ')이에요.'; }
+  if (/마지막|최근|가장 최근|제일 최근/.test(q)) { const t = sorted[0]; return head + '\n가장 최근 여행은 ' + fpRange(t) + '의 「' + t.title + '」(' + where(t) + ')이에요.'; }
+  if (/(가장|제일)\s*(길|오래)/.test(q)) { const t = [...list].sort((a, b) => fpDays(b).length - fpDays(a).length)[0]; return head + '\n가장 길었던 여행은 「' + t.title + '」 ' + fpDays(t).length + '일 (' + fpRange(t) + ')이에요.'; }
+  if (/(가장|제일)\s*(많이|자주)/.test(q)) { const top = Object.entries(cs).sort((a, b) => b[1] - a[1]).slice(0, 3); return top.length ? head + '\n가장 많이 간 나라는 ' + top.map(([c, n], i) => (i ? ', ' : '') + cname(c) + ' (' + n + '번)').join('') + '이에요.' : head + '\n나라 정보가 있는 기록이 없어요.'; }
+  if (/몇\s*(개국|나라)/.test(q)) return head + '\n' + Object.keys(cs).length + '개국에 다녀왔어요: ' + Object.keys(cs).map(cname).join(', ') + '.';
+  if (/몇\s*(일|박)|며칠/.test(q)) return head + '\n여행한 날은 모두 ' + days.size + '일이에요 (여행 ' + list.length + '번).';
+  if (/(사진).{0,6}(몇|얼마)|몇\s*장/.test(q)) { const p = list.reduce((s, t) => s + (t.media || []).filter(m => /^image/.test(m.type)).length, 0), v = list.reduce((s, t) => s + (t.media || []).filter(m => /^video/.test(m.type)).length, 0); return head + '\n사진 ' + p + '장, 동영상 ' + v + '개가 기록돼 있어요.'; }
+  if (/몇\s*(번|회)|횟수|얼마나/.test(q)) return head + '\n모두 ' + list.length + '번 다녀왔어요.\n' + sorted.slice(0, 6).map(line).join('\n');
+  if (/(뭐|무엇|뭘|무슨).{0,6}(먹|했|있었)|메모|먹었/.test(q)) { const sn = sorted.slice(0, 4).map(t => { const memo = (t.memo || Object.values(t.dayMemos || {}).join(' / ')).replace(/\s+/g, ' ').trim(); return '• ' + fpRange(t) + ' 「' + t.title + '」: ' + (memo ? memo.slice(0, 120) + (memo.length > 120 ? '…' : '') : '(남겨둔 메모가 없어요)'); }); return head + '\n' + sn.join('\n'); }
+  const places = Object.keys(cs).map(cname); return head + '\n' + (places.length ? places.join(', ') + '에 다녀왔어요. 여행은 ' + list.length + '번이에요.\n' : '') + sorted.slice(0, 8).map(line).join('\n') + (sorted.length > 8 ? '\n…외 ' + (sorted.length - 8) + '건' : '');
+}
 // ---------- AI 비서 ----------
 const AIGW = 'https://n8n.aitestbed.kr/webhook/apihub-ai';
-const AIQ = ['오늘 우산 챙겨야 해?', '지금 강남역 붐벼?', '서울에서 지금 제일 붐비는 곳은?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천', '서울역에서 강남역 가는 법', '근처 다이소에 우산 있어?', '다이소 건전지 어디가 제일 가까워?', '이번 주말 공연 뭐 있어?', '이번 주말 뮤지컬 뭐 해?', '이번 주말 전국 축제 뭐 있어?', '제주 숙소 찾아줘', '근처 캠핑장 찾아줘', '부산 걷기길 알려줘', '서울에서 부산 열차 운행 참고자료 보여줘', '영동선 휴게소 테마 알려줘', '제주 반려동물 여행지 찾아줘', '부산 무장애 여행 상세 안내해줘', '제주 해수욕장과 지역예보 알려줘'];
+const AIQ = ['작년 여름에 어디 갔지?', '가장 많이 간 나라는?', '마지막 여행은 언제였어?', '오늘 우산 챙겨야 해?', '지금 강남역 붐벼?', '서울에서 지금 제일 붐비는 곳은?', '타이레놀 먹을 때 주의할 점', '김밥 한 줄 칼로리는?', '인천공항 1터미널 출국장 붐벼?', '북한산 높이랑 가는 방법', '근처 점심 맛집 추천', '서울역에서 강남역 가는 법', '근처 다이소에 우산 있어?', '다이소 건전지 어디가 제일 가까워?', '이번 주말 공연 뭐 있어?', '이번 주말 뮤지컬 뭐 해?', '이번 주말 전국 축제 뭐 있어?', '제주 숙소 찾아줘', '근처 캠핑장 찾아줘', '부산 걷기길 알려줘', '서울에서 부산 열차 운행 참고자료 보여줘', '영동선 휴게소 테마 알려줘', '제주 반려동물 여행지 찾아줘', '부산 무장애 여행 상세 안내해줘', '제주 해수욕장과 지역예보 알려줘'];
 function addMsg(cls, text, small) { const c = $('#chat'); const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; if (small) { const sm = document.createElement('small'); sm.textContent = small; d.appendChild(sm); } c.appendChild(d); c.scrollTop = c.scrollHeight; return d; }
 async function askAI(q) {
   q = (q || $('#aiq').value).trim(); if (!q) return; $('#aiq').value = ''; $('#aigo').disabled = true; addMsg('u', q);
+  try { const lo = await travelAnswer(q); if (lo) { addMsg('a', lo, '내 여행 발자취 · 이 기기 안에서만 계산해요 (AI 서버로 보내지 않아요)'); $('#aigo').disabled = false; return; } } catch (e) {}
   const wait = addMsg('a', '데이터를 찾아보는 중… (5~10초, 다이소 재고와 공연 검색은 더 걸릴 수 있어요)');
   try {
     const u = AIGW + '?q=' + encodeURIComponent(q) + '&lat=' + pos.lat + '&lon=' + pos.lon + '&name=' + encodeURIComponent(pos.name);
