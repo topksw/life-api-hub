@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>여행 발자취</title>
+<style>
+:root{--pink:#f07a9b;--deep:#70433d;--bg:#fff8f3;--line:#f0dcd3;--soft:#fff1f6;--mint:#e9f7f1}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif;background:var(--bg);color:#3c2a27}
+header{padding:16px 16px 8px}h1{margin:0;font-size:22px;color:var(--deep)}.sub{color:#8a706a;font-size:13px;margin-top:4px}
+nav{display:flex;gap:6px;padding:0 16px;flex-wrap:wrap}nav button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:14px}nav button[aria-pressed=true]{background:var(--pink);color:#fff;border-color:var(--pink)}
+main{padding:12px 16px 30px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px}.stat b{display:block;font-size:22px;color:var(--pink)}.stat span{font-size:12px;color:#8a706a}
+#mapwrap{position:relative;background:#eaf5fb;border-radius:14px;overflow:hidden;border:1px solid #d7e9f2;touch-action:none}#map{width:100%;height:auto;display:block;cursor:grab}
+#map path{fill:#fdfaf6;stroke:#b9c7cf;stroke-width:.35;vector-effect:non-scaling-stroke;cursor:pointer}#map path.v1{fill:#f9c7d4}#map path.v2{fill:#f39ab3}#map path.v3{fill:#e8638a}#map path.sel{stroke:#3c2a27;stroke-width:1.6}#map path:hover{opacity:.82}
+.tip{position:absolute;pointer-events:none;background:rgba(60,42,39,.9);color:#fff;padding:4px 8px;border-radius:8px;font-size:12px;display:none}
+.mapbtn{position:absolute;right:8px;display:flex;flex-direction:column;gap:4px;top:8px}.mapbtn button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:16px}
+.legend{display:flex;gap:10px;align-items:center;font-size:12px;color:#8a706a;margin-top:8px;flex-wrap:wrap}.sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:3px;border:1px solid #ddd}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px;color:var(--deep)}input,textarea,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}textarea{min-height:110px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:560px){.row{grid-template-columns:1fr}}
+.btn{border:0;background:var(--pink);color:#fff;border-radius:10px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer}.btn.g{background:#fff;color:var(--deep);border:1px solid var(--line)}.btn.d{background:#fff;color:#c0392b;border:1px solid #f1c0b8}.btn:disabled{opacity:.5}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.chip{background:var(--soft);border:1px solid #f7cada;border-radius:999px;padding:4px 10px;font-size:13px}.chip button{border:0;background:none;cursor:pointer;margin-left:4px;color:#b05}
+.muted{color:#8a706a;font-size:13px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.mem{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;text-align:left;padding:0;font:inherit;color:inherit}.mem:hover{box-shadow:0 4px 14px rgba(112,67,61,.12)}.cover{height:150px;background:var(--soft) center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative}.cover .n{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;border-radius:8px;padding:2px 7px}.mem .in{padding:10px 12px}.mem h3{margin:0 0 4px;font-size:16px}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px}@media(max-width:700px){.filters{grid-template-columns:1fr 1fr}}
+.tl-year{font-size:18px;font-weight:700;color:var(--deep);margin:18px 0 8px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;margin-top:8px}.thumbs div{position:relative}.thumbs img,.thumbs video{width:100%;height:90px;object-fit:cover;border-radius:8px;background:#000}.thumbs button{position:absolute;top:2px;right:2px;border:0;border-radius:50%;width:22px;height:22px;background:rgba(0,0,0,.6);color:#fff;cursor:pointer}
+dialog{border:0;border-radius:18px;max-width:860px;width:calc(100% - 24px);padding:0;max-height:92vh}dialog::backdrop{background:rgba(40,25,22,.55)}.dlg{padding:16px}.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin:12px 0}.gallery img,.gallery video{width:100%;border-radius:10px;max-height:300px;object-fit:cover;background:#000;cursor:zoom-in}
+.memo{white-space:pre-wrap;line-height:1.6;background:var(--bg);border-radius:12px;padding:12px}
+.flash{background:var(--mint);border:1px solid #bfe7d6;border-radius:12px;padding:10px;margin-bottom:12px}
+.hide{display:none!important}.empty{text-align:center;padding:30px 10px;color:#8a706a}
+#viewer{background:#000;max-width:96vw}#viewer img,#viewer video{max-width:94vw;max-height:88vh;display:block;margin:auto}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-bottom:10px;background:#fff}.seg button{border:0;background:none;padding:7px 14px;cursor:pointer;font:inherit;font-size:14px}.seg button[aria-pressed=true]{background:var(--deep);color:#fff}
+#krwrap{background:#eaf5fb;border-radius:14px;border:1px solid #d7e9f2;position:relative}#krmap{width:100%;max-width:520px;height:auto;display:block;margin:auto}#krmap path{fill:#fdfaf6;stroke:#9fb3be;stroke-width:.8;cursor:pointer}#krmap path.v1{fill:#f9c7d4}#krmap path.v2{fill:#f39ab3}#krmap path.v3{fill:#e8638a}#krmap path:hover{opacity:.82}.pin{fill:#c2185b;stroke:#fff;stroke-width:.8;cursor:pointer;vector-effect:non-scaling-stroke}.pin:hover{fill:#7b1040}#krmap text{font-size:11px;fill:#5a3d38;pointer-events:none;text-anchor:middle;font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:3px}
+.thumbs select{width:100%;margin-top:3px;padding:3px 4px;font-size:12px}#eDays textarea{min-height:60px}.dayh{font-weight:700;color:var(--deep);margin:16px 0 6px;font-size:15px}.regs{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:6px}.regs label{margin:0;font-weight:500;border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;gap:5px;align-items:center;cursor:pointer;background:#fff}.regs input{width:auto}.regs label:has(input:checked){background:var(--soft);border-color:var(--pink)}
+</style></head><body>
+<header><h1>👣 여행 발자취</h1><div class="sub">여행마다 사진·동영상·메모를 남기고, 다녀온 나라를 세계 지도에 색칠해요. 기록은 이 브라우저에 저장되고, 원하면 내 구글 드라이브로 동기화할 수 있어요.</div></header>
+<nav aria-label="여행 발자취 메뉴"><button data-v="map" aria-pressed="true">🗺️ 세계 지도</button><button data-v="list" aria-pressed="false">📚 추억 모아보기</button><button data-v="edit" aria-pressed="false">✏️ 기록하기</button><button data-v="data" aria-pressed="false">💾 백업</button></nav>
+<main>
+<section id="v-map">
+ <div id="onthisday"></div>
+ <div class="stats"><div class="stat"><b id="sCountries">0</b><span>다녀온 나라</span></div><div class="stat"><b id="sPct">0%</b><span>세계 정복률 (250개국 기준)</span></div><div class="stat"><b id="sKr">0/17</b><span>국내 시·도</span></div><div class="stat"><b id="sTrips">0</b><span>여행 기록</span></div><div class="stat"><b id="sDays">0</b><span>여행한 날</span></div><div class="stat"><b id="sMedia">0</b><span>사진·동영상</span></div></div>
+ <div class="seg" role="group" aria-label="지도 선택"><button id="mWorld" aria-pressed="true">🌍 세계</button><button id="mKr" aria-pressed="false">🇰🇷 대한민국</button></div>
+ <div class="card hide" id="krcard"><div id="krwrap"><svg id="krmap" viewBox="0 0 545 560" role="img" aria-label="다녀온 시·도가 색칠된 대한민국 지도"></svg><div class="tip" id="krtip"></div></div><div class="legend"><span>시·도를 누르면 그곳의 추억을 보여줘요 · 국내 여행은 기록할 때 시·도를 골라 주세요</span></div></div>
+ <div class="card" id="worldcard"><div id="mapwrap"><svg id="map" viewBox="0 0 1000 500" role="img" aria-label="다녀온 나라가 색칠된 세계 지도"><g id="mapg"></g><g id="pinsW"></g></svg><div class="tip" id="tip"></div><div class="mapbtn"><button id="zin" aria-label="확대">＋</button><button id="zout" aria-label="축소">－</button><button id="zreset" aria-label="처음 크기">⟲</button></div></div>
+ <div class="legend"><span><i class="sw" style="background:#fdfaf6"></i>아직</span><span><i class="sw" style="background:#f9c7d4"></i>1번</span><span><i class="sw" style="background:#f39ab3"></i>2번</span><span><i class="sw" style="background:#e8638a"></i>3번 이상</span><span>· 나라를 누르면 그곳의 추억을 보여줘요 · 드래그로 이동, 휠로 확대</span></div></div>
+ <div class="card"><h3 style="margin:0 0 8px;font-size:16px">다녀온 나라</h3><div id="visitedList" class="chips"></div></div>
+</section>
+<section id="v-list" class="hide">
+ <div class="card filters"><input id="fq" placeholder="제목·장소·메모 검색" aria-label="검색"><select id="fyear" aria-label="연도"></select><select id="ftheme" aria-label="주제"></select><select id="fcountry" aria-label="나라"></select></div>
+ <div id="listOut"></div>
+</section>
+<section id="v-edit" class="hide"><div class="card">
+ <h2 id="editTitle" style="margin:0;font-size:18px">새 여행 기록</h2>
+ <label for="eTitle">여행 이름 *</label><input id="eTitle" maxlength="80" placeholder="예: 첫 오사카 먹방 여행">
+ <div class="row"><div><label for="eStart">시작한 날 *</label><input type="date" id="eStart"></div><div><label for="eEnd">돌아온 날</label><input type="date" id="eEnd"></div></div>
+ <label for="eCountry">다녀온 나라 * (여러 나라 가능)</label><input id="eCountry" list="countryList" placeholder="나라 이름 입력 후 선택 (예: 일본)"><datalist id="countryList"></datalist><div id="eCountries" class="chips"></div>
+ <div id="eRegBox" class="hide"><label>대한민국 시·도 (국내 지도 색칠용)</label><div id="eRegs" class="regs"></div></div>
+ <label for="ePlace">도시·장소</label><input id="ePlace" maxlength="200" placeholder="예: 오사카, 교토 기요미즈데라">
+ <label for="eTheme">주제 (쉼표로 구분)</label><input id="eTheme" maxlength="120" placeholder="예: 맛집, 가족, 바다, 기념일"><div id="themeHint" class="chips"></div>
+ <label for="eMemo">메모</label><textarea id="eMemo" maxlength="20000" placeholder="그날의 기분, 먹은 것, 기억하고 싶은 순간…"></textarea>
+ <label for="eFiles">사진·동영상 추가</label><input type="file" id="eFiles" accept="image/*,video/*" multiple><div class="muted">파일은 서버로 올라가지 않고 이 기기 브라우저 저장소에 보관돼요. 큰 동영상이 많으면 저장 공간이 부족할 수 있어요.</div><div id="eFound"></div><div id="eThumbs" class="thumbs"></div><div id="eDaysBox" class="hide"><label>날짜별 기록 (선택)</label><div class="muted">그날 있었던 일을 따로 적어 두면 추억 보기에서 날짜별로 정리돼요. 사진은 위 선택 칸으로 날짜를 옮길 수 있어요.</div><div id="eDays"></div></div>
+ <div class="bar"><button class="btn" id="save">저장하기</button><button class="btn g" id="cancel">취소</button><span id="saveMsg" class="muted" aria-live="polite"></span></div>
+</div></section>
+<section id="v-data" class="hide"><div class="card">
+ <h2 style="margin:0 0 6px;font-size:18px">백업과 복원</h2>
+ <p class="muted">기록은 이 브라우저(기기)에만 있어서, 브라우저 데이터를 지우거나 기기를 바꾸면 사라질 수 있어요. 가끔 백업 파일을 내려받아 두세요. 백업 파일에는 사진·동영상이 그대로 들어가요.</p>
+ <div id="usage" class="muted"></div>
+ <div class="bar"><button class="btn" id="exportBtn">백업 파일 내려받기</button><label class="btn g" style="margin:0;font-weight:600">백업 불러오기<input type="file" id="importFile" accept="application/json,.json" class="hide"></label></div>
+ <p id="dataMsg" class="muted" aria-live="polite"></p>
+</div>
+<div class="card"><h2 style="margin:0 0 6px;font-size:18px">☁️ 구글 드라이브 동기화</h2><p class="muted">내 구글 드라이브의 「여행 발자취」 폴더에 기록과 사진·동영상을 저장해요. 다른 기기에서 같은 구글 계정으로 연결하면 이어서 볼 수 있어요. 이 앱이 만든 파일에만 접근하고(drive.file 권한), 드라이브의 다른 파일은 볼 수 없어요. 사진 안의 위치정보도 그대로 올라가요.</p><div class="bar"><button class="btn" id="syncBtn">구글 드라이브 연결하고 동기화</button><button class="btn g hide" id="unlinkBtn">연결 끊기</button></div><p id="syncMsg" class="muted" aria-live="polite"></p></div></section>
+</main>
+<dialog id="detail"><div class="dlg" id="detailBody"></div></dialog>
+<dialog id="viewer"><div id="viewerBody"></div></dialog>
+<script src="footprints-world.js"></script>
+<script>
+'use strict';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const COUNTRIES=(window.WORLD_COUNTRIES||[]);const CNAME=Object.fromEntries(COUNTRIES.map(c=>[c.code,c.name]));
+const KR=(window.KR_REGIONS||[]);const RNAME=Object.fromEntries(KR.map(r=>[r.code,r.short]));
+const regTxt=t=>(t.regions||[]).length?(t.regions||[]).map(r=>RNAME[r]||r).join('·'):'';
+const FLAG=c=>/^[A-Z]{2}$/.test(c)?String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt(0))):'📍';
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+// ---------- IndexedDB ----------
+let DB;function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(window.FP_DBNAME||'travel-footprints',1);r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('trips',{keyPath:'id'});d.createObjectStore('media',{keyPath:'id'});};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+function tx(store,mode,fn){return new Promise((res,rej)=>{const t=DB.transaction(store,mode);let out;t.oncomplete=()=>res(out);t.onerror=t.onabort=()=>rej(t.error||new Error('저장 실패'));out=fn(t);});}
+const reqP=r=>new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});
+async function allTrips(){const t=DB.transaction('trips');return reqP(t.objectStore('trips').getAll());}
+async function getMedia(id){const t=DB.transaction('media');return reqP(t.objectStore('media').get(id));}
+let TRIPS=[];const URLS=new Map();
+async function mediaURL(id){if(URLS.has(id))return URLS.get(id);const m=await getMedia(id);if(!m)return null;const u=URL.createObjectURL(m.blob);URLS.set(id,u);return u;}
+// ---------- views ----------
+function go(v){$$('nav button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));['map','list','edit','data'].forEach(x=>$('#v-'+x).classList.toggle('hide',x!==v));if(v==='list')renderList();if(v==='data')showUsage();if(v==='edit'&&!EDIT)newEdit();}
+$$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+// ---------- map ----------
+const VB={x:0,y:0,w:1000,h:500};function setVB(){VB.w=Math.min(1000,Math.max(60,VB.w));VB.h=VB.w/2;VB.x=Math.min(1000-VB.w,Math.max(0,VB.x));VB.y=Math.min(500-VB.h,Math.max(0,VB.y));$('#map').setAttribute('viewBox',[VB.x,VB.y,VB.w,VB.h].join(' '));const pr=(3.2*VB.w/1000).toFixed(2);$$('#pinsW circle').forEach(c=>c.setAttribute('r',pr));}
+function zoom(f,cx=VB.x+VB.w/2,cy=VB.y+VB.h/2){const nw=Math.min(1000,Math.max(60,VB.w*f));VB.x=cx-(cx-VB.x)*nw/VB.w;VB.y=cy-(cy-VB.y)*nw/VB.w;VB.w=nw;setVB();}
+function buildMap(){$('#mapg').innerHTML=COUNTRIES.map(c=>'<path data-c="'+c.code+'" d="'+c.d+'"></path>').join('');
+ const svg=$('#map'),tip=$('#tip');let drag=null,moved=false;
+ svg.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,vx:VB.x,vy:VB.y};moved=false;});
+ window.addEventListener('pointermove',e=>{if(!drag)return;const r=svg.getBoundingClientRect(),k=VB.w/r.width;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>4)moved=true;VB.x=drag.vx-dx*k;VB.y=drag.vy-dy*k;setVB();});
+ window.addEventListener('pointerup',()=>{drag=null;});
+ svg.addEventListener('wheel',e=>{e.preventDefault();const r=svg.getBoundingClientRect();zoom(e.deltaY>0?1.25:0.8,VB.x+(e.clientX-r.left)/r.width*VB.w,VB.y+(e.clientY-r.top)/r.height*VB.h);},{passive:false});
+ svg.addEventListener('mousemove',e=>{const p=e.target.closest('path');if(!p){tip.style.display='none';return;}const c=p.dataset.c,n=VISIT[c]||0,r=$('#mapwrap').getBoundingClientRect();tip.textContent=FLAG(c)+' '+(CNAME[c]||c)+(n?' · 여행 '+n+'번':' · 아직 안 가봤어요');tip.style.display='block';tip.style.left=Math.min(r.width-160,e.clientX-r.left+12)+'px';tip.style.top=(e.clientY-r.top+12)+'px';});
+ svg.addEventListener('mouseleave',()=>tip.style.display='none');
+ svg.addEventListener('click',e=>{if(moved)return;const p=e.target.closest('path');if(!p)return;const c=p.dataset.c;if(VISIT[c]){$('#fcountry').value=c;go('list');}else{tip.textContent=(CNAME[c]||c)+': 아직 기록이 없어요';}});
+ buildKr();
+ $('#zin').onclick=()=>zoom(.7);$('#zout').onclick=()=>zoom(1.4);$('#zreset').onclick=()=>{VB.x=0;VB.y=0;VB.w=1000;setVB();};}
+function buildKr(){const svg=$('#krmap'),tip=$('#krtip');svg.innerHTML=KR.map(r=>'<path data-r="'+r.code+'" d="'+r.d+'"></path>').join('')+KR.map(r=>'<text x="'+r.lx+'" y="'+(r.ly+4)+'">'+esc(r.short)+'</text>').join('');
+ svg.addEventListener('mousemove',e=>{const p=e.target.closest('path');if(!p){tip.style.display='none';return;}const n=RVISIT[p.dataset.r]||0,w=$('#krwrap').getBoundingClientRect();tip.textContent=(RNAME[p.dataset.r])+(n?' · 여행 '+n+'번':' · 아직 안 가봤어요');tip.style.display='block';tip.style.left=Math.min(w.width-150,e.clientX-w.left+12)+'px';tip.style.top=(e.clientY-w.top+12)+'px';});
+ svg.addEventListener('mouseleave',()=>tip.style.display='none');
+ svg.addEventListener('click',e=>{const p=e.target.closest('path');if(!p)return;if(RVISIT[p.dataset.r]){$('#fcountry').value='R'+p.dataset.r;go('list');}else{tip.textContent=RNAME[p.dataset.r]+': 아직 기록이 없어요';tip.style.display='block';}});
+ $('#mWorld').onclick=()=>mapMode('world');$('#mKr').onclick=()=>mapMode('kr');}
+function mapMode(m){$('#mWorld').setAttribute('aria-pressed',String(m==='world'));$('#mKr').setAttribute('aria-pressed',String(m==='kr'));$('#worldcard').classList.toggle('hide',m!=='world');$('#krcard').classList.toggle('hide',m!=='kr');try{localStorage.setItem('fp-mapmode',m);}catch(e){}}
+let RVISIT={};
+let VISIT={};
+function renderMap(){VISIT={};let days=0,media=0;const seen=new Set();for(const t of TRIPS){(t.countries||[]).forEach(c=>VISIT[c]=(VISIT[c]||0)+1);media+=(t.media||[]).length;for(const d of tripDays(t))seen.add(d);}days=seen.size;RVISIT={};for(const t of TRIPS)(t.regions||[]).forEach(r=>RVISIT[r]=(RVISIT[r]||0)+1);
+ $$('#krmap path').forEach(p=>{const n=RVISIT[p.dataset.r]||0;p.setAttribute('class',n>=3?'v3':n===2?'v2':n?'v1':'');});$('#sKr').textContent=Object.keys(RVISIT).length+'/17';
+ $$('#mapg path').forEach(p=>{const n=VISIT[p.dataset.c]||0;p.setAttribute('class',n>=3?'v3':n===2?'v2':n?'v1':'');});
+ const codes=Object.keys(VISIT).sort((a,b)=>VISIT[b]-VISIT[a]||(CNAME[a]||a).localeCompare(CNAME[b]||b,'ko'));
+ $('#sCountries').textContent=codes.length;$('#sPct').textContent=(codes.length/250*100).toFixed(1)+'%';$('#sTrips').textContent=TRIPS.length;$('#sDays').textContent=days;$('#sMedia').textContent=media;
+ $('#visitedList').innerHTML=codes.length?codes.map(c=>'<button class="chip" data-vc="'+c+'" style="cursor:pointer">'+FLAG(c)+' '+esc(CNAME[c]||c)+' · '+VISIT[c]+'번</button>').join(''):'<span class="muted">첫 여행을 기록하면 지도가 색칠돼요.</span>';
+ $$('[data-vc]').forEach(b=>b.onclick=()=>{$('#fcountry').value=b.dataset.vc;go('list');});
+ renderPins();renderOnThisDay();}
+function renderPins(){const cl=new Map();for(const t of TRIPS)for(const m of t.media||[]){if(!m.gps)continue;const k=Math.round(m.gps.lat*20)+','+Math.round(m.gps.lon*20);let c=cl.get(k);if(!c){c={lat:m.gps.lat,lon:m.gps.lon,trips:new Map()};cl.set(k,c);}c.trips.set(t.id,t);}
+ const W=[],K=[];for(const c of cl.values()){const ts=[...c.trips.values()].sort((a,b)=>b.start.localeCompare(a.start));const title=ts.map(t=>t.title).join(', ');const id=ts[0].id;const x=((c.lon+180)*1000/360).toFixed(2),y=((90-c.lat)*500/180).toFixed(2);W.push('<circle class="pin" data-open="'+id+'" cx="'+x+'" cy="'+y+'" r="3.2"><title>'+esc(title)+'</title></circle>');if(c.lat>33&&c.lat<38.7&&c.lon>124.4&&c.lon<132){K.push('<circle class="pin" data-open="'+id+'" cx="'+((c.lon-124.4)*Math.cos(36*Math.PI/180)*100).toFixed(1)+'" cy="'+((38.7-c.lat)*100).toFixed(1)+'" r="5"><title>'+esc(title)+'</title></circle>');}}
+ $('#pinsW').innerHTML=W.join('');let kp=$('#pinsK');if(!kp){kp=document.createElementNS('http://www.w3.org/2000/svg','g');kp.id='pinsK';$('#krmap').append(kp);}kp.innerHTML=K.join('');setVB();
+ $$('#pinsW .pin,#pinsK .pin').forEach(p=>p.onclick=e=>{e.stopPropagation();openDetail(p.dataset.open);});}
+function tripDays(t){const out=[];if(!t.start)return out;const s=new Date(t.start+'T00:00:00Z'),e=new Date((t.end&&t.end>=t.start?t.end:t.start)+'T00:00:00Z');for(let d=new Date(s),i=0;d<=e&&i<400;d.setUTCDate(d.getUTCDate()+1),i++)out.push(d.toISOString().slice(0,10));return out;}
+function renderOnThisDay(){const now=new Date(),md=String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'),y=now.getFullYear();const hits=TRIPS.filter(t=>tripDays(t).some(d=>d.slice(5)===md&&+d.slice(0,4)<y));
+ $('#onthisday').innerHTML=hits.length?'<div class="flash">📅 <b>오늘의 추억</b> · '+hits.map(t=>'<a href="#" data-open="'+t.id+'">'+(y-+t.start.slice(0,4))+'년 전 「'+esc(t.title)+'」</a>').join(', ')+'</div>':'';
+ $$('#onthisday [data-open]').forEach(a=>a.onclick=e=>{e.preventDefault();openDetail(a.dataset.open);});}
+// ---------- list ----------
+function fillFilters(){const keep={y:$('#fyear').value,t:$('#ftheme').value,c:$('#fcountry').value};const years=[...new Set(TRIPS.map(t=>t.start.slice(0,4)))].sort().reverse();const themes=[...new Set(TRIPS.flatMap(t=>t.themes||[]))].sort((a,b)=>a.localeCompare(b,'ko'));const cs=[...new Set(TRIPS.flatMap(t=>t.countries||[]))].sort((a,b)=>(CNAME[a]||a).localeCompare(CNAME[b]||b,'ko'));
+ $('#fyear').innerHTML='<option value="">모든 연도</option>'+years.map(y=>'<option>'+y+'</option>').join('');$('#ftheme').innerHTML='<option value="">모든 주제</option>'+themes.map(t=>'<option value="'+esc(t)+'">#'+esc(t)+'</option>').join('');$('#fcountry').innerHTML='<option value="">모든 나라</option>'+cs.map(c=>'<option value="'+c+'">'+FLAG(c)+' '+esc(CNAME[c]||c)+'</option>').join('')+KR.filter(r=>TRIPS.some(t=>(t.regions||[]).includes(r.code))).map(r=>'<option value="R'+r.code+'">　└ '+esc(r.short)+'</option>').join('');
+ $('#fyear').value=years.includes(keep.y)?keep.y:'';$('#ftheme').value=themes.includes(keep.t)?keep.t:'';$('#fcountry').value=[...$('#fcountry').options].some(o=>o.value===keep.c)?keep.c:'';
+ $('#themeHint').innerHTML=themes.slice(0,12).map(t=>'<button type="button" class="chip" data-th="'+esc(t)+'" style="cursor:pointer">#'+esc(t)+'</button>').join('');$$('[data-th]').forEach(b=>b.onclick=()=>{const cur=splitThemes($('#eTheme').value);if(!cur.includes(b.dataset.th))cur.push(b.dataset.th);$('#eTheme').value=cur.join(', ');});}
+['#fq','#fyear','#ftheme','#fcountry'].forEach(s=>$(s).addEventListener('input',renderList));
+const fmtD=d=>d?d.replace(/-/g,'.'):'';
+async function renderList(){const q=$('#fq').value.trim().toLowerCase(),y=$('#fyear').value,th=$('#ftheme').value,c=$('#fcountry').value;
+ const rows=TRIPS.filter(t=>(!y||t.start.startsWith(y))&&(!th||(t.themes||[]).includes(th))&&(!c||(c[0]==='R'?(t.regions||[]).includes(c.slice(1)):(t.countries||[]).includes(c)))&&(!q||[t.title,t.place,t.memo,regTxt(t),Object.values(t.dayMemos||{}).join(" "),(t.themes||[]).join(' '),(t.countries||[]).map(x=>CNAME[x]).join(' ')].join(' ').toLowerCase().includes(q))).sort((a,b)=>b.start.localeCompare(a.start));
+ if(!TRIPS.length){$('#listOut').innerHTML='<div class="empty">아직 기록이 없어요.<br><br><button class="btn" onclick="go(\'edit\')">첫 여행 기록하기</button></div>';return;}
+ if(!rows.length){$('#listOut').innerHTML='<div class="empty">조건에 맞는 추억이 없어요.</div>';return;}
+ let h='',yr='';for(const t of rows){const ty=t.start.slice(0,4);if(ty!==yr){if(yr)h+='</div>';yr=ty;h+='<div class="tl-year">'+ty+'년</div><div class="grid">';}
+  const cover=(t.media||[])[0];h+='<button class="mem" data-open="'+t.id+'"><div class="cover" data-cover="'+(cover?esc(cover.id)+'|'+cover.type:'')+'">'+(cover?'':(FLAG((t.countries||[])[0]||'')))+((t.media||[]).length?'<span class="n">📷 '+t.media.length+'</span>':'')+'</div><div class="in"><h3>'+esc(t.title)+'</h3><div class="muted">'+fmtD(t.start)+(t.end&&t.end!==t.start?' ~ '+fmtD(t.end):'')+'</div><div class="muted">'+(t.countries||[]).map(x=>FLAG(x)+' '+esc(CNAME[x]||x)).join(' · ')+(regTxt(t)?' ('+esc(regTxt(t))+')':'')+(t.place?' · '+esc(t.place):'')+'</div><div class="chips">'+(t.themes||[]).map(x=>'<span class="chip">#'+esc(x)+'</span>').join('')+'</div></div></button>';}
+ $('#listOut').innerHTML=h+'</div>';$$('#listOut [data-open]').forEach(b=>b.onclick=()=>openDetail(b.dataset.open));
+ for(const el of $$('[data-cover]')){const [id,type]=el.dataset.cover.split('|');if(!id)continue;const u=await mediaURL(id);if(!u)continue;if(type.startsWith('image'))el.style.backgroundImage='url("'+u+'")';else el.insertAdjacentHTML('afterbegin','<video src="'+u+'#t=0.5" muted preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>');}}
+// ---------- detail ----------
+async function addGallery(parent,list){const g=document.createElement('div');g.className='gallery';parent.append(g);for(const m of list){const u=await mediaURL(m.id);if(!u)continue;const el=document.createElement(m.type.startsWith('video')?'video':'img');el.src=u;if(el.tagName==='VIDEO'){el.controls=true;el.preload='metadata';}else{el.alt=m.name||'여행 사진';el.onclick=()=>{$('#viewerBody').innerHTML='';const big=document.createElement('img');big.src=u;$('#viewerBody').append(big);$('#viewer').showModal();};}g.append(el);}}
+async function openDetail(id){const t=TRIPS.find(x=>x.id===id);if(!t)return;const b=$('#detailBody');
+ b.innerHTML='<div style="display:flex;justify-content:space-between;gap:8px;align-items:start"><div><h2 style="margin:0">'+esc(t.title)+'</h2><div class="muted">'+fmtD(t.start)+(t.end&&t.end!==t.start?' ~ '+fmtD(t.end)+' ('+tripDays(t).length+'일)':'')+'</div><div class="muted">'+(t.countries||[]).map(x=>FLAG(x)+' '+esc(CNAME[x]||x)).join(' · ')+(regTxt(t)?' ('+esc(regTxt(t))+')':'')+(t.place?' · '+esc(t.place):'')+'</div><div class="chips">'+(t.themes||[]).map(x=>'<span class="chip">#'+esc(x)+'</span>').join('')+'</div></div><button class="btn g" id="dClose" aria-label="닫기">✕</button></div><div id="dBody"></div><div class="bar"><button class="btn" id="dEdit">수정</button><button class="btn d" id="dDel">삭제</button></div>';
+ $('#dClose').onclick=()=>$('#detail').close();$('#dEdit').onclick=()=>{$('#detail').close();startEdit(t);};$('#dDel').onclick=()=>delTrip(t);
+ $('#detail').showModal();const body=$('#dBody');const dm=t.dayMemos||{};const days=tripDays(t).slice(0,400);const media=t.media||[];const dated=media.some(m=>m.day&&days.includes(m.day))||Object.keys(dm).length>0;
+ if(t.memo){body.insertAdjacentHTML('beforeend',(dated?'<div class="dayh">전체 메모</div>':'')+'<div class="memo">'+esc(t.memo)+'</div>');}
+ if(!dated){if(media.length)await addGallery(body,media);if(!t.memo)body.insertAdjacentHTML('beforeend','<p class="muted">메모가 없어요.</p>');return;}
+ for(let i=0;i<days.length;i++){const d=days[i],ms=media.filter(m=>m.day===d);if(!dm[d]&&!ms.length)continue;body.insertAdjacentHTML('beforeend','<div class="dayh">Day '+(i+1)+' · '+md(d)+' ('+WD[new Date(d+'T00:00:00Z').getUTCDay()]+')</div>'+(dm[d]?'<div class="memo">'+esc(dm[d])+'</div>':''));if(ms.length)await addGallery(body,ms);}
+ const rest=media.filter(m=>!m.day||!days.includes(m.day));if(rest.length){body.insertAdjacentHTML('beforeend','<div class="dayh">날짜 미지정</div>');await addGallery(body,rest);}}
+$('#viewer').onclick=()=>$('#viewer').close();
+async function delTrip(t){if(!confirm('「'+t.title+'」 기록과 사진·동영상 '+(t.media||[]).length+'개를 삭제할까요? 되돌릴 수 없어요.'))return;await tx(['trips','media'],'readwrite',x=>{x.objectStore('trips').delete(t.id);(t.media||[]).forEach(m=>x.objectStore('media').delete(m.id));});const tb=lsGet('tomb',{});tb[t.id]={t:new Date().toISOString()};lsSet('tomb',tb);$('#detail').close();await reload();autoSync();}
+// ---------- edit ----------
+let EDIT=null;
+function newEdit(){EDIT={id:null,countries:[],regions:[],dayMemos:{},keep:[],add:[],remove:[]};$('#editTitle').textContent='새 여행 기록';['#eTitle','#eStart','#eEnd','#ePlace','#eTheme','#eMemo','#eCountry'].forEach(s=>$(s).value='');$('#eFiles').value='';$('#saveMsg').textContent='';renderEditChips();renderEditThumbs();}
+function startEdit(t){EDIT={id:t.id,countries:[...(t.countries||[])],regions:[...(t.regions||[])],dayMemos:{...(t.dayMemos||{})},keep:(t.media||[]).map(m=>({...m})),add:[],remove:[]};$('#editTitle').textContent='기록 수정';$('#eTitle').value=t.title;$('#eStart').value=t.start;$('#eEnd').value=t.end||'';$('#ePlace').value=t.place||'';$('#eTheme').value=(t.themes||[]).join(', ');$('#eMemo').value=t.memo||'';$('#eCountry').value='';$('#saveMsg').textContent='';renderEditChips();renderEditThumbs();go('edit');}
+function renderEditChips(){$('#eCountries').innerHTML=EDIT.countries.map(c=>'<span class="chip">'+FLAG(c)+' '+esc(CNAME[c]||c)+'<button type="button" data-rc="'+c+'" aria-label="'+esc(CNAME[c]||c)+' 빼기">✕</button></span>').join('');$$('[data-rc]').forEach(b=>b.onclick=()=>{EDIT.countries=EDIT.countries.filter(x=>x!==b.dataset.rc);renderEditChips();});
+ const hasKr=EDIT.countries.includes('KR');$('#eRegBox').classList.toggle('hide',!hasKr);$('#eRegs').innerHTML=KR.map(r=>'<label><input type="checkbox" value="'+r.code+'"'+(EDIT.regions.includes(r.code)?' checked':'')+'>'+esc(r.short)+'</label>').join('');$$('#eRegs input').forEach(i=>i.onchange=()=>{EDIT.regions=$$('#eRegs input:checked').map(x=>x.value);});}
+function pickCountry(){const v=$('#eCountry').value.trim();if(!v)return false;const c=COUNTRIES.find(x=>x.name===v||x.en.toLowerCase()===v.toLowerCase()||x.code===v.toUpperCase())||COUNTRIES.find(x=>x.name.includes(v));if(!c)return false;if(!EDIT.countries.includes(c.code))EDIT.countries.push(c.code);$('#eCountry').value='';renderEditChips();return true;}
+$('#eCountry').addEventListener('change',pickCountry);$('#eCountry').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();pickCountry();}});
+const WD=['일','월','화','수','목','금','토'];const md=d=>d.slice(5).replace('-','.');
+function editDates(){const s=$('#eStart').value,e=$('#eEnd').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return [];return tripDays({start:s,end:e}).slice(0,60);}
+const localDate=ms=>{const d=new Date(ms);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+function effDay(m,dates){if(m.day!==undefined&&m.day!==null)return m.day;return m.guess&&dates.includes(m.guess)?m.guess:'';}
+async function renderEditThumbs(){const box=$('#eThumbs');box.innerHTML='';const dates=editDates();const items=[...EDIT.keep.map(m=>({m,old:true})),...EDIT.add.map(m=>({m,old:false}))];for(const {m,old} of items){const u=old?await mediaURL(m.id):m.url;const d=document.createElement('div');d.innerHTML=(m.type.startsWith('video')?'<video src="'+u+'" muted preload="metadata"></video>':'<img alt="" src="'+u+'">')+'<button type="button" aria-label="빼기">✕</button>'+(dates.length?'<select aria-label="날짜">'+'<option value="">날짜 미지정</option>'+dates.map((x,i)=>'<option value="'+x+'">Day '+(i+1)+' · '+md(x)+'</option>').join('')+'</select>':'');d.querySelector('button').onclick=()=>{if(old){EDIT.keep=EDIT.keep.filter(x=>x!==m);EDIT.remove.push(m.id);}else{URL.revokeObjectURL(m.url);EDIT.add=EDIT.add.filter(x=>x!==m);}renderEditThumbs();};const sel=d.querySelector('select');if(sel){sel.value=effDay(m,dates);sel.onchange=()=>{m.day=sel.value;};}box.append(d);}renderDays();renderFound();}
+function renderDays(){const dates=editDates(),box=$('#eDaysBox'),out=$('#eDays');box.classList.toggle('hide',!dates.length);out.innerHTML='';dates.forEach((x,i)=>{const w=document.createElement('div');const wd=WD[new Date(x+'T00:00:00Z').getUTCDay()];w.innerHTML='<label>Day '+(i+1)+' · '+md(x)+' ('+wd+')</label><textarea maxlength="5000" placeholder="이 날의 기록"></textarea>';const ta=w.querySelector('textarea');ta.value=EDIT.dayMemos[x]||'';ta.oninput=()=>{EDIT.dayMemos[x]=ta.value;};out.append(w);});}
+async function readExif(f){try{const buf=await f.slice(0,262144).arrayBuffer();const v=new DataView(buf);if(v.getUint16(0)!==0xFFD8)return null;let o=2;while(o+4<v.byteLength){const mk=v.getUint16(o);if(mk===0xFFE1&&v.getUint32(o+4)===0x45786966)return tiff(v,o+10);if(mk===0xFFDA||(mk&0xFF00)!==0xFF00)break;o+=2+v.getUint16(o+2);}}catch(e){}return null;}
+function tiff(v,b){try{const le=v.getUint16(b)===0x4949;const u16=p=>v.getUint16(p,le),u32=p=>v.getUint32(p,le);const sz={1:1,2:1,3:2,4:4,5:8,7:1};
+const ifd=off=>{const m={};const n=u16(b+off);for(let i=0;i<n&&i<200;i++){const e=b+off+2+i*12,type=u16(e+2),cnt=u32(e+4),tot=(sz[type]||1)*cnt;m[u16(e)]={type,cnt,p:tot<=4?e+8:b+u32(e+8)};}return m;};
+const str=e=>{let s='';for(let i=0;i<e.cnt-1&&i<64;i++)s+=String.fromCharCode(v.getUint8(e.p+i));return s;};const rat=(e,i)=>u32(e.p+i*8)/(u32(e.p+i*8+4)||1);
+const i0=ifd(u32(b+4));const out={};
+if(i0[0x8769]){const ex=ifd(u32(i0[0x8769].p));const dt=ex[0x9003]||ex[0x9004];if(dt){const m=str(dt).match(/^(\d{4}):(\d{2}):(\d{2})/);if(m)out.date=m[1]+'-'+m[2]+'-'+m[3];}}
+if(i0[0x8825]){const g=ifd(u32(i0[0x8825].p));if(g[1]&&g[2]&&g[3]&&g[4]){const dm=e=>rat(e,0)+rat(e,1)/60+rat(e,2)/3600;let lat=dm(g[2]),lon=dm(g[4]);if(str(g[1]).startsWith('S'))lat=-lat;if(str(g[3]).startsWith('W'))lon=-lon;if(isFinite(lat)&&isFinite(lon)&&(lat||lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180)out.gps={lat,lon};}}
+return out;}catch(e){return null;}}
+let GIDX=null,KIDX=null;
+function mkIdx(list){return list.map(c=>{const rings=c.d.split('Z').filter(Boolean).map(s=>[...s.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(m=>[+m[1],+m[2]]));let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;rings.forEach(r=>r.forEach(p=>{x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1]);}));return {code:c.code,rings,x0,y0,x1,y1};});}
+function inRings(rings,x,y){let ins=false;for(const r of rings)for(let i=0,j=r.length-1;i<r.length;j=i++){const a=r[i],b=r[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])ins=!ins;}return ins;}
+function nearestC(idx,x,y,max){let best=null,bd=max*max;for(const c of idx){if(x<c.x0-max||x>c.x1+max||y<c.y0-max||y>c.y1+max)continue;for(const r of c.rings)for(const p of r){const d=(p[0]-x)**2+(p[1]-y)**2;if(d<bd){bd=d;best=c.code;}}}return best;}
+function findC(idx,x,y,max){const hit=idx.filter(c=>x>=c.x0&&x<=c.x1&&y>=c.y0&&y<=c.y1&&inRings(c.rings,x,y));return hit.length?hit[0].code:nearestC(idx,x,y,max);}
+function locate(lat,lon){GIDX=GIDX||mkIdx(COUNTRIES);const code=findC(GIDX,(lon+180)*1000/360,(90-lat)*500/180,1.5);if(!code||code.startsWith('AREA'))return null;let region='';if(code==='KR'&&KR.length){KIDX=KIDX||mkIdx(KR);region=findC(KIDX,(lon-124.4)*Math.cos(36*Math.PI/180)*100,(38.7-lat)*100,6)||'';}return {code,region};}
+function renderFound(){const box=$('#eFound');const cs=new Set(),rs=new Set();let dmin='',dmax='';for(const m of EDIT.add){if(m.loc){if(!EDIT.countries.includes(m.loc.code))cs.add(m.loc.code);if(m.loc.region&&!EDIT.regions.includes(m.loc.region))rs.add(m.loc.region);}if(m.guess){if(!dmin||m.guess<dmin)dmin=m.guess;if(!dmax||m.guess>dmax)dmax=m.guess;}}
+ const needDate=dmin&&!$('#eStart').value;if(!cs.size&&!rs.size&&!needDate){box.innerHTML='';return;}
+ box.innerHTML='<div class="flash">📍 사진에서 찾았어요 · '+[...cs].map(c=>FLAG(c)+' '+esc(CNAME[c]||c)).join(', ')+(rs.size?' ('+[...rs].map(r=>esc(RNAME[r])).join('·')+')':'')+(needDate?' · 📅 '+fmtD(dmin)+(dmax!==dmin?' ~ '+fmtD(dmax):''):'')+' <button type="button" class="btn" id="fApply" style="padding:4px 10px;margin-left:6px">적용</button><div class="muted">사진 속 위치정보와 촬영일로 추측한 값이에요. 맞는지 확인해 주세요.</div></div>';
+ $('#fApply').onclick=()=>{cs.forEach(c=>EDIT.countries.push(c));rs.forEach(r=>{if(!EDIT.regions.includes(r))EDIT.regions.push(r);});if(needDate){$('#eStart').value=dmin;if(!$('#eEnd').value&&dmax!==dmin)$('#eEnd').value=dmax;}renderEditChips();renderEditThumbs();};}
+$('#eStart').addEventListener('change',()=>{const s=$('#eStart').value,e=$('#eEnd').value;if(e&&s&&e<s)$('#eEnd').value=s;renderEditThumbs();});$('#eEnd').addEventListener('change',renderEditThumbs);
+$('#eFiles').addEventListener('change',async e=>{const files=[...e.target.files];e.target.value='';for(const f of files){if(!/^(image|video)\//.test(f.type))continue;const m={id:uid(),type:f.type,name:f.name,size:f.size,blob:f,url:URL.createObjectURL(f),guess:localDate(f.lastModified)};if(f.type==='image/jpeg'){const ex=await readExif(f);if(ex){if(ex.date)m.guess=ex.date;if(ex.gps){m.loc=locate(ex.gps.lat,ex.gps.lon);m.gps={lat:+ex.gps.lat.toFixed(3),lon:+ex.gps.lon.toFixed(3)};}}}EDIT.add.push(m);}renderEditThumbs();});
+const splitThemes=s=>[...new Set(s.split(/[,，#]/).map(x=>x.trim()).filter(Boolean))].slice(0,20);
+$('#cancel').onclick=()=>{EDIT=null;go('map');};
+$('#save').onclick=async()=>{pickCountry();const title=$('#eTitle').value.trim(),start=$('#eStart').value,end=$('#eEnd').value;const msg=$('#saveMsg');
+ if(!title)return msg.textContent='여행 이름을 적어 주세요.';if(!start)return msg.textContent='시작한 날을 골라 주세요.';if(end&&end<start)return msg.textContent='돌아온 날이 시작한 날보다 빨라요.';if(!EDIT.countries.length)return msg.textContent='다녀온 나라를 하나 이상 골라 주세요.';
+ const old=EDIT.id?TRIPS.find(t=>t.id===EDIT.id):null;const trip={id:EDIT.id||uid(),title,start,end:end||'',place:$('#ePlace').value.trim(),themes:splitThemes($('#eTheme').value),memo:$('#eMemo').value,countries:EDIT.countries,regions:EDIT.countries.includes('KR')?EDIT.regions.filter(r=>RNAME[r]):[],dayMemos:Object.fromEntries(Object.entries(EDIT.dayMemos).filter(([k,v])=>editDates().includes(k)&&String(v).trim())),media:[...EDIT.keep,...EDIT.add].map(m=>({id:m.id,type:m.type,name:m.name,size:m.size,day:effDay(m,editDates()),...(m.gps?{gps:m.gps}:{})})),created:old?.created||new Date().toISOString(),updated:new Date().toISOString()};
+ $('#save').disabled=true;msg.textContent='저장 중…';
+ try{try{await navigator.storage?.persist?.();}catch(e){}
+  await tx(['trips','media'],'readwrite',x=>{const ms=x.objectStore('media');EDIT.add.forEach(m=>ms.put({id:m.id,trip:trip.id,type:m.type,name:m.name,blob:m.blob}));EDIT.remove.forEach(id=>ms.delete(id));x.objectStore('trips').put(trip);});
+  EDIT.add.forEach(m=>URL.revokeObjectURL(m.url));EDIT.remove.forEach(id=>{URL.revokeObjectURL(URLS.get(id));URLS.delete(id);});EDIT=null;await reload();go('map');autoSync();}
+ catch(e){msg.textContent='저장하지 못했어요: '+(e&&e.name==='QuotaExceededError'?'저장 공간이 부족해요. 동영상을 줄여 보세요.':(e?.message||e));}
+ finally{$('#save').disabled=false;}};
+// ---------- backup ----------
+async function showUsage(){try{const e=await navigator.storage.estimate();const p=navigator.storage.persisted?await navigator.storage.persisted():false;$('#usage').textContent='사용 중인 저장 공간: '+(e.usage/1048576).toFixed(1)+'MB / 약 '+(e.quota/1073741824).toFixed(1)+'GB'+(p?' · 자동 삭제 방지 켜짐':'');}catch(e){$('#usage').textContent='';}}
+const b64=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=()=>rej(r.error);r.readAsDataURL(blob);});
+$('#exportBtn').onclick=async()=>{const msg=$('#dataMsg');msg.textContent='백업 파일 만드는 중…';try{const media=await (async()=>{const t=DB.transaction('media');return reqP(t.objectStore('media').getAll());})();const out={app:'travel-footprints',version:1,exported:new Date().toISOString(),trips:TRIPS,media:[]};for(const m of media)out.media.push({id:m.id,trip:m.trip,type:m.type,name:m.name,data:await b64(m.blob)});const blob=new Blob([JSON.stringify(out)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='여행발자취-백업-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);msg.textContent='여행 '+TRIPS.length+'개, 사진·동영상 '+media.length+'개를 백업했어요 ('+(blob.size/1048576).toFixed(1)+'MB).';}catch(e){msg.textContent='백업 실패: '+(e.message||e);}};
+const okDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s);
+$('#importFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const msg=$('#dataMsg');msg.textContent='불러오는 중…';try{const j=JSON.parse(await f.text());if(j.app!=='travel-footprints'||!Array.isArray(j.trips)||!Array.isArray(j.media))throw new Error('여행 발자취 백업 파일이 아니에요.');
+ const trips=j.trips.filter(t=>t&&typeof t.id==='string'&&typeof t.title==='string'&&okDate(t.start)).map(t=>({id:t.id,title:t.title.slice(0,80),start:t.start,end:okDate(t.end)?t.end:'',place:String(t.place||'').slice(0,200),themes:(Array.isArray(t.themes)?t.themes:[]).map(String).slice(0,20),memo:String(t.memo||'').slice(0,20000),countries:(Array.isArray(t.countries)?t.countries:[]).filter(c=>CNAME[c]),regions:(Array.isArray(t.regions)?t.regions:[]).filter(r=>RNAME[r]),dayMemos:Object.fromEntries(Object.entries(t.dayMemos&&typeof t.dayMemos==='object'?t.dayMemos:{}).filter(([k,v])=>okDate(k)&&typeof v==='string'&&v.trim()).map(([k,v])=>[k,v.slice(0,5000)])),media:(Array.isArray(t.media)?t.media:[]).filter(m=>m&&typeof m.id==='string'&&/^(image|video)\//.test(m.type)).map(m=>({id:m.id,type:m.type,name:String(m.name||''),size:+m.size||0,day:okDate(m.day)?m.day:'',...(m.gps&&Math.abs(+m.gps.lat)<=90&&Math.abs(+m.gps.lon)<=180?{gps:{lat:+m.gps.lat,lon:+m.gps.lon}}:{})})),created:t.created||'',updated:t.updated||''}));
+ const exist=new Set(TRIPS.map(t=>t.id));const fresh=trips.filter(t=>!exist.has(t.id));const need=new Set(fresh.flatMap(t=>t.media.map(m=>m.id)));
+ if(!confirm('백업에서 새 여행 '+fresh.length+'개를 추가할까요? (이미 있는 기록 '+(trips.length-fresh.length)+'개는 그대로 둬요)'))return msg.textContent='취소했어요.';
+ const blobs=[];for(const m of j.media){if(!need.has(m.id)||!/^(image|video)\//.test(m.type)||typeof m.data!=='string')continue;const bin=atob(m.data),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);blobs.push({id:m.id,trip:m.trip,type:m.type,name:String(m.name||''),blob:new Blob([u8],{type:m.type})});}
+ const have=new Set(blobs.map(b=>b.id));fresh.forEach(t=>t.media=t.media.filter(m=>have.has(m.id)));
+ await tx(['trips','media'],'readwrite',x=>{blobs.forEach(b=>x.objectStore('media').put(b));fresh.forEach(t=>x.objectStore('trips').put(t));});await reload();msg.textContent='여행 '+fresh.length+'개, 사진·동영상 '+blobs.length+'개를 불러왔어요.';showUsage();}catch(err){msg.textContent='불러오기 실패: '+(err.message||err);}};
+// ---------- Google Drive sync (drive.file, manual + after save) ----------
+const GCLIENT='334400851272-sujhokv750qgcpimg1dp1pkp2o0sdq13.apps.googleusercontent.com';
+const GAPI='https://www.googleapis.com/drive/v3',GUP='https://www.googleapis.com/upload/drive/v3';
+const SYNC={token:'',exp:0,folder:'',busy:false,ui:false};
+function lsGet(k,d){try{const v=JSON.parse(localStorage.getItem((window.FP_DBNAME||'tf')+':'+k));return v==null?d:v;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem((window.FP_DBNAME||'tf')+':'+k,JSON.stringify(v));}catch(e){}}
+function loadGsi(){return new Promise((res,rej)=>{if(window.google?.accounts?.oauth2)return res();const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=()=>res();s.onerror=()=>rej(new Error('구글 로그인 스크립트를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'));document.head.append(s);});}
+async function getToken(){if(SYNC.token&&Date.now()<SYNC.exp-60000)return SYNC.token;if(!SYNC.ui)throw new Error('NEEDLOGIN');await loadGsi();return new Promise((res,rej)=>{const tc=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.file',callback:r=>{if(r.error)return rej(new Error(r.error==='access_denied'?'연결을 허용하지 않았어요.':'구글 연결 실패: '+(r.error_description||r.error)));SYNC.token=r.access_token;SYNC.exp=Date.now()+(+r.expires_in||3600)*1000;lsSet('linked',1);res(SYNC.token);},error_callback:e=>rej(new Error(e&&e.type==='popup_closed'?'로그인 창이 닫혔어요.':'로그인 창이 열리지 않았어요. 팝업 차단을 풀고 다시 눌러 주세요.'))});tc.requestAccessToken({prompt:lsGet('linked',0)?'':'consent'});});}
+async function gfetch(url,opt={}){const tk=await getToken();const r=await fetch(url,{...opt,headers:{...(opt.headers||{}),Authorization:'Bearer '+tk}});if(r.status===401){SYNC.token='';throw new Error('NEEDLOGIN');}if(!r.ok){let m='';try{m=(await r.json()).error?.message||'';}catch(e){}throw new Error('드라이브 오류 '+r.status+(m?': '+m:''));}return r;}
+async function ensureFolder(){if(SYNC.folder)return SYNC.folder;let id=lsGet('folder','');if(id){try{const j=await (await gfetch(GAPI+'/files/'+id+'?fields=id,trashed')).json();if(j.id&&!j.trashed)return SYNC.folder=id;}catch(e){if(e.message==='NEEDLOGIN')throw e;}id='';}
+ const q=encodeURIComponent("mimeType='application/vnd.google-apps.folder' and name='여행 발자취' and trashed=false");const l=await (await gfetch(GAPI+'/files?q='+q+'&fields=files(id)')).json();if(l.files&&l.files.length)id=l.files[0].id;else id=(await (await gfetch(GAPI+'/files',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'여행 발자취',mimeType:'application/vnd.google-apps.folder'})})).json()).id;lsSet('folder',id);return SYNC.folder=id;}
+async function listRemote(folder){const out=[];let pt='';do{const q=encodeURIComponent("'"+folder+"' in parents and trashed=false");const j=await (await gfetch(GAPI+'/files?q='+q+'&pageSize=1000&fields=nextPageToken,files(id,name,appProperties)'+(pt?'&pageToken='+pt:''))).json();out.push(...(j.files||[]));pt=j.nextPageToken||'';}while(pt);return out;}
+async function upload(folder,name,blob,props,existingId){const meta={name,appProperties:props};if(!existingId)meta.parents=[folder];const type=blob.type||'application/octet-stream';const init=await gfetch(GUP+'/files'+(existingId?'/'+existingId:'')+'?uploadType=resumable&fields=id',{method:existingId?'PATCH':'POST',headers:{'Content-Type':'application/json; charset=UTF-8','X-Upload-Content-Type':type},body:JSON.stringify(meta)});const loc=init.headers.get('Location');if(!loc)throw new Error('업로드 주소를 받지 못했어요.');const r=await fetch(loc,{method:'PUT',headers:{'Content-Type':type},body:blob});if(!r.ok)throw new Error('업로드 실패 '+r.status);return (await r.json()).id;}
+const gdel=id=>gfetch(GAPI+'/files/'+id,{method:'DELETE'});
+const gdl=async id=>gfetch(GAPI+'/files/'+id+'?alt=media');
+async function syncNow(ui){if(SYNC.busy)return;SYNC.busy=true;SYNC.ui=!!ui;const say=t=>{const el=$('#syncMsg');if(el)el.textContent=t;};const st={up:0,down:0,del:0};
+ try{say('드라이브 확인 중…');const folder=await ensureFolder();const files=await listRemote(folder);const byName=new Map(files.map(f=>[f.name,f]));const rTrips=new Map();files.forEach(f=>{const m=f.name.match(/^trip-(.+)\.json$/);if(m)rTrips.set(m[1],f);});
+  const tomb=lsGet('tomb',{});const ids=new Set([...TRIPS.map(t=>t.id),...rTrips.keys(),...Object.keys(tomb)]);
+  for(const id of ids){const local=TRIPS.find(t=>t.id===id),remote=rTrips.get(id);const lu=local?(local.updated||''):'';const tu=tomb[id]?tomb[id].t:'';const ru=remote?(remote.appProperties&&remote.appProperties.updated)||'':'';const rdel=!!remote&&remote.appProperties&&remote.appProperties.deleted==='1';
+   const name=local?local.title:id;
+   if(!local&&tu&&(!remote||tu>=ru)){ if(remote&&!rdel){say('삭제 반영 중…');for(const f of files)if(f.appProperties&&f.appProperties.trip===id){await gdel(f.id);st.del++;}await upload(folder,'trip-'+id+'.json',new Blob([JSON.stringify({id,deleted:true,updated:tu})],{type:'application/json'}),{updated:tu,deleted:'1'},remote.id);}delete tomb[id];lsSet('tomb',tomb);continue;}
+   if(!local&&remote&&rdel)continue;
+   if(local&&remote&&rdel&&lu<=ru){say('다른 기기에서 지운 기록 정리 중…');await tx(['trips','media'],'readwrite',x=>{x.objectStore('trips').delete(id);(local.media||[]).forEach(m=>x.objectStore('media').delete(m.id));});st.del++;continue;}
+   const push=local&&(!remote||rdel||lu>ru),pull=remote&&!rdel&&(!local||ru>lu);
+   if(push){say('올리는 중: '+name);const used=new Set();for(const m of local.media||[]){used.add('media-'+m.id);if(!byName.has('media-'+m.id)){const rec=await getMedia(m.id);if(rec){await upload(folder,'media-'+m.id,rec.blob,{trip:id,kind:'media'});st.up++;}}}
+    for(const f of files)if(f.appProperties&&f.appProperties.trip===id&&f.name.startsWith('media-')&&!used.has(f.name)){await gdel(f.id);}
+    await upload(folder,'trip-'+id+'.json',new Blob([JSON.stringify(local)],{type:'application/json'}),{updated:lu,deleted:'0'},remote?remote.id:undefined);delete tomb[id];lsSet('tomb',tomb);st.up++;}
+   else if(pull){say('받는 중…');const j=await (await gdl(remote.id)).json();if(!j||j.id!==id||!Array.isArray(j.media))throw new Error('드라이브 기록 형식이 올바르지 않아요.');const keep=[];const blobs=[];for(const m of j.media){if(!(m.id&&/^(image|video)\//.test(m.type)))continue;const have=await getMedia(m.id);if(have){keep.push(m);continue;}const f=byName.get('media-'+m.id);if(!f)continue;say('사진·동영상 받는 중: '+(j.title||''));const blob=await (await gdl(f.id)).blob();blobs.push({id:m.id,trip:id,type:m.type,name:m.name||'',blob:new Blob([blob],{type:m.type})});keep.push(m);}
+    j.media=keep;const gone=local?(local.media||[]).filter(m=>!keep.some(k=>k.id===m.id)):[];await tx(['trips','media'],'readwrite',x=>{blobs.forEach(b=>x.objectStore('media').put(b));gone.forEach(m=>x.objectStore('media').delete(m.id));x.objectStore('trips').put(j);});st.down++;delete tomb[id];lsSet('tomb',tomb);}}
+  await reload();lsSet('last',new Date().toISOString());say('동기화 완료 · 올림 '+st.up+' · 받음 '+st.down+(st.del?' · 삭제 반영 '+st.del:'')+' ('+new Date().toLocaleTimeString('ko-KR')+')');
+ }catch(e){say(e.message==='NEEDLOGIN'?'로그인이 필요해요. 「지금 동기화」를 눌러 주세요.':'동기화 실패: '+(e.message||e));}
+ finally{SYNC.busy=false;SYNC.ui=false;syncUi();}}
+function autoSync(){if(lsGet('linked',0)&&SYNC.token&&Date.now()<SYNC.exp-60000)syncNow(false).catch(()=>{});}
+function syncUi(){const on=!!lsGet('linked',0);$('#syncBtn').textContent=on?'지금 동기화':'구글 드라이브 연결하고 동기화';$('#unlinkBtn').classList.toggle('hide',!on);$('#syncBtn').disabled=SYNC.busy;}
+$('#syncBtn').onclick=()=>syncNow(true);
+$('#unlinkBtn').onclick=()=>{if(!confirm('이 기기의 드라이브 연결을 끊을까요? 드라이브에 올린 파일과 이 기기의 기록은 그대로 남아요.'))return;try{if(SYNC.token&&window.google?.accounts?.oauth2)google.accounts.oauth2.revoke(SYNC.token,()=>{});}catch(e){}SYNC.token='';SYNC.exp=0;SYNC.folder='';lsSet('linked',0);lsSet('folder','');$('#syncMsg').textContent='연결을 끊었어요.';syncUi();};
+syncUi();
+// ---------- init ----------
+async function reload(){TRIPS=(await allTrips()).sort((a,b)=>b.start.localeCompare(a.start));fillFilters();renderMap();if(!$('#v-list').classList.contains('hide'))renderList();}
+(async()=>{$('#countryList').innerHTML=COUNTRIES.filter(c=>!c.code.startsWith('AREA')).map(c=>'<option value="'+esc(c.name)+'">'+esc(c.en)+'</option>').join('');buildMap();try{mapMode(localStorage.getItem('fp-mapmode')==='kr'?'kr':'world');}catch(e){}try{DB=await openDB();await reload();}catch(e){document.querySelector('main').insertAdjacentHTML('afterbegin','<div class="card" style="color:#c0392b">이 브라우저에서는 저장소를 열 수 없어요(시크릿 모드 등). '+esc(e.message||e)+'</div>');}})();
+window.go=go;
+</script></body></html>
