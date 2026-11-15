@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>여행 발자취</title>
+<link rel="manifest" href="footprints.webmanifest"><meta name="theme-color" content="#f07a9b"><link rel="apple-touch-icon" href="footprints-icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 :root{--pink:#f07a9b;--deep:#70433d;--bg:#fff8f3;--line:#f0dcd3;--soft:#fff1f6;--mint:#e9f7f1}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif;background:var(--bg);color:#3c2a27}
@@ -29,11 +30,11 @@ dialog{border:0;border-radius:18px;max-width:860px;width:calc(100% - 24px);paddi
 #viewer{background:#000;max-width:96vw}#viewer img,#viewer video{max-width:94vw;max-height:88vh;display:block;margin:auto}
 .bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-bottom:10px;background:#fff}.seg button{border:0;background:none;padding:7px 14px;cursor:pointer;font:inherit;font-size:14px}.seg button[aria-pressed=true]{background:var(--deep);color:#fff}
-#krwrap{background:#eaf5fb;border-radius:14px;border:1px solid #d7e9f2;position:relative}#krmap{width:100%;max-width:520px;height:auto;display:block;margin:auto}#krmap path{fill:#fdfaf6;stroke:#9fb3be;stroke-width:.8;cursor:pointer}#krmap path.v1{fill:#f9c7d4}#krmap path.v2{fill:#f39ab3}#krmap path.v3{fill:#e8638a}#krmap path:hover{opacity:.82}.pin{fill:#c2185b;stroke:#fff;stroke-width:.8;cursor:pointer;vector-effect:non-scaling-stroke}.pin:hover{fill:#7b1040}#krmap text{font-size:11px;fill:#5a3d38;pointer-events:none;text-anchor:middle;font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:3px}
+#krwrap{background:#eaf5fb;border-radius:14px;border:1px solid #d7e9f2;position:relative}#krmap{width:100%;max-width:520px;height:auto;display:block;margin:auto}#krmap path{fill:#fdfaf6;stroke:#9fb3be;stroke-width:.8;cursor:pointer}#krmap path.v1{fill:#f9c7d4}#krmap path.v2{fill:#f39ab3}#krmap path.v3{fill:#e8638a}#krmap path:hover{opacity:.82}#map path.w{fill:#ffe08a}.sumbar{display:flex;align-items:flex-end;gap:4px;height:110px;margin-top:6px}.sumbar div{flex:1;text-align:center;font-size:11px;color:#8a706a}.sumbar i{display:block;background:var(--pink);border-radius:5px 5px 0 0;min-height:2px;margin-bottom:3px}.hl{padding:6px 0;border-bottom:1px dashed var(--line)}.hl:last-child{border:0}.pin{fill:#c2185b;stroke:#fff;stroke-width:.8;cursor:pointer;vector-effect:non-scaling-stroke}.pin:hover{fill:#7b1040}#krmap text{font-size:11px;fill:#5a3d38;pointer-events:none;text-anchor:middle;font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:3px}
 .thumbs select{width:100%;margin-top:3px;padding:3px 4px;font-size:12px}#eDays textarea{min-height:60px}.dayh{font-weight:700;color:var(--deep);margin:16px 0 6px;font-size:15px}.regs{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:6px}.regs label{margin:0;font-weight:500;border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;gap:5px;align-items:center;cursor:pointer;background:#fff}.regs input{width:auto}.regs label:has(input:checked){background:var(--soft);border-color:var(--pink)}
 </style></head><body>
 <header><h1>👣 여행 발자취</h1><div class="sub">여행마다 사진·동영상·메모를 남기고, 다녀온 나라를 세계 지도에 색칠해요. 기록은 이 브라우저에 저장되고, 원하면 내 구글 드라이브로 동기화할 수 있어요.</div></header>
-<nav aria-label="여행 발자취 메뉴"><button data-v="map" aria-pressed="true">🗺️ 세계 지도</button><button data-v="list" aria-pressed="false">📚 추억 모아보기</button><button data-v="edit" aria-pressed="false">✏️ 기록하기</button><button data-v="data" aria-pressed="false">💾 백업</button></nav>
+<nav aria-label="여행 발자취 메뉴"><button data-v="map" aria-pressed="true">🗺️ 세계 지도</button><button data-v="list" aria-pressed="false">📚 추억 모아보기</button><button data-v="sum" aria-pressed="false">📊 요약</button><button data-v="edit" aria-pressed="false">✏️ 기록하기</button><button data-v="data" aria-pressed="false">💾 백업</button></nav>
 <main>
 <section id="v-map">
  <div id="onthisday"></div>
@@ -41,13 +42,15 @@ dialog{border:0;border-radius:18px;max-width:860px;width:calc(100% - 24px);paddi
  <div class="seg" role="group" aria-label="지도 선택"><button id="mWorld" aria-pressed="true">🌍 세계</button><button id="mKr" aria-pressed="false">🇰🇷 대한민국</button></div>
  <div class="card hide" id="krcard"><div id="krwrap"><svg id="krmap" viewBox="0 0 545 560" role="img" aria-label="다녀온 시·도가 색칠된 대한민국 지도"></svg><div class="tip" id="krtip"></div></div><div class="legend"><span>시·도를 누르면 그곳의 추억을 보여줘요 · 국내 여행은 기록할 때 시·도를 골라 주세요</span></div></div>
  <div class="card" id="worldcard"><div id="mapwrap"><svg id="map" viewBox="0 0 1000 500" role="img" aria-label="다녀온 나라가 색칠된 세계 지도"><g id="mapg"></g><g id="pinsW"></g></svg><div class="tip" id="tip"></div><div class="mapbtn"><button id="zin" aria-label="확대">＋</button><button id="zout" aria-label="축소">－</button><button id="zreset" aria-label="처음 크기">⟲</button></div></div>
- <div class="legend"><span><i class="sw" style="background:#fdfaf6"></i>아직</span><span><i class="sw" style="background:#f9c7d4"></i>1번</span><span><i class="sw" style="background:#f39ab3"></i>2번</span><span><i class="sw" style="background:#e8638a"></i>3번 이상</span><span>· 나라를 누르면 그곳의 추억을 보여줘요 · 드래그로 이동, 휠로 확대</span></div></div>
+ <div class="legend"><span><i class="sw" style="background:#fdfaf6"></i>아직</span><span><i class="sw" style="background:#ffe08a"></i>가고 싶어요</span><span><i class="sw" style="background:#f9c7d4"></i>1번</span><span><i class="sw" style="background:#f39ab3"></i>2번</span><span><i class="sw" style="background:#e8638a"></i>3번 이상</span><span>· 다녀온 나라를 누르면 추억 보기, 안 가본 나라를 누르면 ⭐가고 싶은 곳 표시 · 드래그로 이동, 휠로 확대</span></div></div>
  <div class="card"><h3 style="margin:0 0 8px;font-size:16px">다녀온 나라</h3><div id="visitedList" class="chips"></div></div>
+ <div class="card"><h3 style="margin:0 0 8px;font-size:16px">⭐ 가고 싶은 나라</h3><div style="display:flex;gap:8px"><input id="wIn" list="countryList" placeholder="나라 이름 (예: 아이슬란드)" aria-label="가고 싶은 나라"><button class="btn" id="wAdd" style="white-space:nowrap">추가</button></div><div id="wList" class="chips"></div></div>
 </section>
 <section id="v-list" class="hide">
  <div class="card filters"><input id="fq" placeholder="제목·장소·메모 검색" aria-label="검색"><select id="fyear" aria-label="연도"></select><select id="ftheme" aria-label="주제"></select><select id="fcountry" aria-label="나라"></select></div>
  <div id="listOut"></div>
 </section>
+<section id="v-sum" class="hide"><div class="card"><label for="sumYear" style="margin-top:0">기간</label><select id="sumYear"></select></div><div id="sumOut"></div></section>
 <section id="v-edit" class="hide"><div class="card">
  <h2 id="editTitle" style="margin:0;font-size:18px">새 여행 기록</h2>
  <label for="eTitle">여행 이름 *</label><input id="eTitle" maxlength="80" placeholder="예: 첫 오사카 먹방 여행">
@@ -67,7 +70,8 @@ dialog{border:0;border-radius:18px;max-width:860px;width:calc(100% - 24px);paddi
  <div class="bar"><button class="btn" id="exportBtn">백업 파일 내려받기</button><label class="btn g" style="margin:0;font-weight:600">백업 불러오기<input type="file" id="importFile" accept="application/json,.json" class="hide"></label></div>
  <p id="dataMsg" class="muted" aria-live="polite"></p>
 </div>
-<div class="card"><h2 style="margin:0 0 6px;font-size:18px">☁️ 구글 드라이브 동기화</h2><p class="muted">내 구글 드라이브의 「여행 발자취」 폴더에 기록과 사진·동영상을 저장해요. 다른 기기에서 같은 구글 계정으로 연결하면 이어서 볼 수 있어요. 이 앱이 만든 파일에만 접근하고(drive.file 권한), 드라이브의 다른 파일은 볼 수 없어요. 사진 안의 위치정보도 그대로 올라가요.</p><div class="bar"><button class="btn" id="syncBtn">구글 드라이브 연결하고 동기화</button><button class="btn g hide" id="unlinkBtn">연결 끊기</button></div><p id="syncMsg" class="muted" aria-live="polite"></p></div></section>
+<div class="card"><h2 style="margin:0 0 6px;font-size:18px">☁️ 구글 드라이브 동기화</h2><p class="muted">내 구글 드라이브의 「여행 발자취」 폴더에 기록과 사진·동영상을 저장해요. 다른 기기에서 같은 구글 계정으로 연결하면 이어서 볼 수 있어요. 이 앱이 만든 파일에만 접근하고(drive.file 권한), 드라이브의 다른 파일은 볼 수 없어요. 사진 안의 위치정보도 그대로 올라가요.</p><div class="bar"><button class="btn" id="syncBtn">구글 드라이브 연결하고 동기화</button><button class="btn g hide" id="unlinkBtn">연결 끊기</button></div><p id="syncMsg" class="muted" aria-live="polite"></p></div>
+<div class="card"><h2 style="margin:0 0 6px;font-size:18px">📲 홈 화면에 설치</h2><p class="muted" id="pwaTxt"></p><div class="bar"><button class="btn hide" id="pwaBtn">홈 화면에 추가</button><a class="btn g" href="footprints.html" target="_blank" rel="noopener" style="text-decoration:none">앱 화면만 따로 열기</a></div></div></section>
 </main>
 <dialog id="detail"><div class="dlg" id="detailBody"></div></dialog>
 <dialog id="viewer"><div id="viewerBody"></div></dialog>
@@ -90,7 +94,7 @@ async function getMedia(id){const t=DB.transaction('media');return reqP(t.object
 let TRIPS=[];const URLS=new Map();
 async function mediaURL(id){if(URLS.has(id))return URLS.get(id);const m=await getMedia(id);if(!m)return null;const u=URL.createObjectURL(m.blob);URLS.set(id,u);return u;}
 // ---------- views ----------
-function go(v){$$('nav button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));['map','list','edit','data'].forEach(x=>$('#v-'+x).classList.toggle('hide',x!==v));if(v==='list')renderList();if(v==='data')showUsage();if(v==='edit'&&!EDIT)newEdit();}
+function go(v){$$('nav button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));['map','list','sum','edit','data'].forEach(x=>$('#v-'+x).classList.toggle('hide',x!==v));if(v==='list')renderList();if(v==='sum')renderSummary();if(v==='data')showUsage();if(v==='edit'&&!EDIT)newEdit();}
 $$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
 // ---------- map ----------
 const VB={x:0,y:0,w:1000,h:500};function setVB(){VB.w=Math.min(1000,Math.max(60,VB.w));VB.h=VB.w/2;VB.x=Math.min(1000-VB.w,Math.max(0,VB.x));VB.y=Math.min(500-VB.h,Math.max(0,VB.y));$('#map').setAttribute('viewBox',[VB.x,VB.y,VB.w,VB.h].join(' '));const pr=(3.2*VB.w/1000).toFixed(2);$$('#pinsW circle').forEach(c=>c.setAttribute('r',pr));}
@@ -101,9 +105,9 @@ function buildMap(){$('#mapg').innerHTML=COUNTRIES.map(c=>'<path data-c="'+c.cod
  window.addEventListener('pointermove',e=>{if(!drag)return;const r=svg.getBoundingClientRect(),k=VB.w/r.width;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>4)moved=true;VB.x=drag.vx-dx*k;VB.y=drag.vy-dy*k;setVB();});
  window.addEventListener('pointerup',()=>{drag=null;});
  svg.addEventListener('wheel',e=>{e.preventDefault();const r=svg.getBoundingClientRect();zoom(e.deltaY>0?1.25:0.8,VB.x+(e.clientX-r.left)/r.width*VB.w,VB.y+(e.clientY-r.top)/r.height*VB.h);},{passive:false});
- svg.addEventListener('mousemove',e=>{const p=e.target.closest('path');if(!p){tip.style.display='none';return;}const c=p.dataset.c,n=VISIT[c]||0,r=$('#mapwrap').getBoundingClientRect();tip.textContent=FLAG(c)+' '+(CNAME[c]||c)+(n?' · 여행 '+n+'번':' · 아직 안 가봤어요');tip.style.display='block';tip.style.left=Math.min(r.width-160,e.clientX-r.left+12)+'px';tip.style.top=(e.clientY-r.top+12)+'px';});
+ svg.addEventListener('mousemove',e=>{const p=e.target.closest('path');if(!p){tip.style.display='none';return;}const c=p.dataset.c,n=VISIT[c]||0,r=$('#mapwrap').getBoundingClientRect();tip.textContent=FLAG(c)+' '+(CNAME[c]||c)+(n?' · 여행 '+n+'번':WISH.includes(c)?' · ⭐ 가고 싶은 곳 (누르면 해제)':' · 아직 안 가봤어요 (누르면 ⭐ 표시)');tip.style.display='block';tip.style.left=Math.min(r.width-160,e.clientX-r.left+12)+'px';tip.style.top=(e.clientY-r.top+12)+'px';});
  svg.addEventListener('mouseleave',()=>tip.style.display='none');
- svg.addEventListener('click',e=>{if(moved)return;const p=e.target.closest('path');if(!p)return;const c=p.dataset.c;if(VISIT[c]){$('#fcountry').value=c;go('list');}else{tip.textContent=(CNAME[c]||c)+': 아직 기록이 없어요';}});
+ svg.addEventListener('click',e=>{if(moved)return;const p=e.target.closest('path');if(!p)return;const c=p.dataset.c;if(VISIT[c]){$('#fcountry').value=c;go('list');}else if(!c.startsWith('AREA')){toggleWish(c);}});
  buildKr();
  $('#zin').onclick=()=>zoom(.7);$('#zout').onclick=()=>zoom(1.4);$('#zreset').onclick=()=>{VB.x=0;VB.y=0;VB.w=1000;setVB();};}
 function buildKr(){const svg=$('#krmap'),tip=$('#krtip');svg.innerHTML=KR.map(r=>'<path data-r="'+r.code+'" d="'+r.d+'"></path>').join('')+KR.map(r=>'<text x="'+r.lx+'" y="'+(r.ly+4)+'">'+esc(r.short)+'</text>').join('');
@@ -113,10 +117,10 @@ function buildKr(){const svg=$('#krmap'),tip=$('#krtip');svg.innerHTML=KR.map(r=
  $('#mWorld').onclick=()=>mapMode('world');$('#mKr').onclick=()=>mapMode('kr');}
 function mapMode(m){$('#mWorld').setAttribute('aria-pressed',String(m==='world'));$('#mKr').setAttribute('aria-pressed',String(m==='kr'));$('#worldcard').classList.toggle('hide',m!=='world');$('#krcard').classList.toggle('hide',m!=='kr');try{localStorage.setItem('fp-mapmode',m);}catch(e){}}
 let RVISIT={};
-let VISIT={};
+let VISIT={};let WISH=[];
 function renderMap(){VISIT={};let days=0,media=0;const seen=new Set();for(const t of TRIPS){(t.countries||[]).forEach(c=>VISIT[c]=(VISIT[c]||0)+1);media+=(t.media||[]).length;for(const d of tripDays(t))seen.add(d);}days=seen.size;RVISIT={};for(const t of TRIPS)(t.regions||[]).forEach(r=>RVISIT[r]=(RVISIT[r]||0)+1);
  $$('#krmap path').forEach(p=>{const n=RVISIT[p.dataset.r]||0;p.setAttribute('class',n>=3?'v3':n===2?'v2':n?'v1':'');});$('#sKr').textContent=Object.keys(RVISIT).length+'/17';
- $$('#mapg path').forEach(p=>{const n=VISIT[p.dataset.c]||0;p.setAttribute('class',n>=3?'v3':n===2?'v2':n?'v1':'');});
+ $$('#mapg path').forEach(p=>{const n=VISIT[p.dataset.c]||0;p.setAttribute('class',n>=3?'v3':n===2?'v2':n?'v1':WISH.includes(p.dataset.c)?'w':'');});renderWish();
  const codes=Object.keys(VISIT).sort((a,b)=>VISIT[b]-VISIT[a]||(CNAME[a]||a).localeCompare(CNAME[b]||b,'ko'));
  $('#sCountries').textContent=codes.length;$('#sPct').textContent=(codes.length/250*100).toFixed(1)+'%';$('#sTrips').textContent=TRIPS.length;$('#sDays').textContent=days;$('#sMedia').textContent=media;
  $('#visitedList').innerHTML=codes.length?codes.map(c=>'<button class="chip" data-vc="'+c+'" style="cursor:pointer">'+FLAG(c)+' '+esc(CNAME[c]||c)+' · '+VISIT[c]+'번</button>').join(''):'<span class="muted">첫 여행을 기록하면 지도가 색칠돼요.</span>';
@@ -205,7 +209,7 @@ $('#save').onclick=async()=>{pickCountry();const title=$('#eTitle').value.trim()
 // ---------- backup ----------
 async function showUsage(){try{const e=await navigator.storage.estimate();const p=navigator.storage.persisted?await navigator.storage.persisted():false;$('#usage').textContent='사용 중인 저장 공간: '+(e.usage/1048576).toFixed(1)+'MB / 약 '+(e.quota/1073741824).toFixed(1)+'GB'+(p?' · 자동 삭제 방지 켜짐':'');}catch(e){$('#usage').textContent='';}}
 const b64=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=()=>rej(r.error);r.readAsDataURL(blob);});
-$('#exportBtn').onclick=async()=>{const msg=$('#dataMsg');msg.textContent='백업 파일 만드는 중…';try{const media=await (async()=>{const t=DB.transaction('media');return reqP(t.objectStore('media').getAll());})();const out={app:'travel-footprints',version:1,exported:new Date().toISOString(),trips:TRIPS,media:[]};for(const m of media)out.media.push({id:m.id,trip:m.trip,type:m.type,name:m.name,data:await b64(m.blob)});const blob=new Blob([JSON.stringify(out)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='여행발자취-백업-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);msg.textContent='여행 '+TRIPS.length+'개, 사진·동영상 '+media.length+'개를 백업했어요 ('+(blob.size/1048576).toFixed(1)+'MB).';}catch(e){msg.textContent='백업 실패: '+(e.message||e);}};
+$('#exportBtn').onclick=async()=>{const msg=$('#dataMsg');msg.textContent='백업 파일 만드는 중…';try{const media=await (async()=>{const t=DB.transaction('media');return reqP(t.objectStore('media').getAll());})();const out={app:'travel-footprints',version:1,exported:new Date().toISOString(),trips:TRIPS,wish:WISH,media:[]};for(const m of media)out.media.push({id:m.id,trip:m.trip,type:m.type,name:m.name,data:await b64(m.blob)});const blob=new Blob([JSON.stringify(out)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='여행발자취-백업-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);msg.textContent='여행 '+TRIPS.length+'개, 사진·동영상 '+media.length+'개를 백업했어요 ('+(blob.size/1048576).toFixed(1)+'MB).';}catch(e){msg.textContent='백업 실패: '+(e.message||e);}};
 const okDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s);
 $('#importFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const msg=$('#dataMsg');msg.textContent='불러오는 중…';try{const j=JSON.parse(await f.text());if(j.app!=='travel-footprints'||!Array.isArray(j.trips)||!Array.isArray(j.media))throw new Error('여행 발자취 백업 파일이 아니에요.');
  const trips=j.trips.filter(t=>t&&typeof t.id==='string'&&typeof t.title==='string'&&okDate(t.start)).map(t=>({id:t.id,title:t.title.slice(0,80),start:t.start,end:okDate(t.end)?t.end:'',place:String(t.place||'').slice(0,200),themes:(Array.isArray(t.themes)?t.themes:[]).map(String).slice(0,20),memo:String(t.memo||'').slice(0,20000),countries:(Array.isArray(t.countries)?t.countries:[]).filter(c=>CNAME[c]),regions:(Array.isArray(t.regions)?t.regions:[]).filter(r=>RNAME[r]),dayMemos:Object.fromEntries(Object.entries(t.dayMemos&&typeof t.dayMemos==='object'?t.dayMemos:{}).filter(([k,v])=>okDate(k)&&typeof v==='string'&&v.trim()).map(([k,v])=>[k,v.slice(0,5000)])),media:(Array.isArray(t.media)?t.media:[]).filter(m=>m&&typeof m.id==='string'&&/^(image|video)\//.test(m.type)).map(m=>({id:m.id,type:m.type,name:String(m.name||''),size:+m.size||0,day:okDate(m.day)?m.day:'',...(m.gps&&Math.abs(+m.gps.lat)<=90&&Math.abs(+m.gps.lon)<=180?{gps:{lat:+m.gps.lat,lon:+m.gps.lon}}:{})})),created:t.created||'',updated:t.updated||''}));
@@ -213,6 +217,7 @@ $('#importFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';
  if(!confirm('백업에서 새 여행 '+fresh.length+'개를 추가할까요? (이미 있는 기록 '+(trips.length-fresh.length)+'개는 그대로 둬요)'))return msg.textContent='취소했어요.';
  const blobs=[];for(const m of j.media){if(!need.has(m.id)||!/^(image|video)\//.test(m.type)||typeof m.data!=='string')continue;const bin=atob(m.data),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);blobs.push({id:m.id,trip:m.trip,type:m.type,name:String(m.name||''),blob:new Blob([u8],{type:m.type})});}
  const have=new Set(blobs.map(b=>b.id));fresh.forEach(t=>t.media=t.media.filter(m=>have.has(m.id)));
+ if(Array.isArray(j.wish)){WISH=[...new Set([...WISH,...j.wish.filter(c=>typeof c==='string'&&CNAME[c])])];lsSet('wish',WISH);lsSet('wishT',new Date().toISOString());}
  await tx(['trips','media'],'readwrite',x=>{blobs.forEach(b=>x.objectStore('media').put(b));fresh.forEach(t=>x.objectStore('trips').put(t));});await reload();msg.textContent='여행 '+fresh.length+'개, 사진·동영상 '+blobs.length+'개를 불러왔어요.';showUsage();}catch(err){msg.textContent='불러오기 실패: '+(err.message||err);}};
 // ---------- Google Drive sync (drive.file, manual + after save) ----------
 const GCLIENT='334400851272-sujhokv750qgcpimg1dp1pkp2o0sdq13.apps.googleusercontent.com';
@@ -243,6 +248,7 @@ async function syncNow(ui){if(SYNC.busy)return;SYNC.busy=true;SYNC.ui=!!ui;const
     await upload(folder,'trip-'+id+'.json',new Blob([JSON.stringify(local)],{type:'application/json'}),{updated:lu,deleted:'0'},remote?remote.id:undefined);delete tomb[id];lsSet('tomb',tomb);st.up++;}
    else if(pull){say('받는 중…');const j=await (await gdl(remote.id)).json();if(!j||j.id!==id||!Array.isArray(j.media))throw new Error('드라이브 기록 형식이 올바르지 않아요.');const keep=[];const blobs=[];for(const m of j.media){if(!(m.id&&/^(image|video)\//.test(m.type)))continue;const have=await getMedia(m.id);if(have){keep.push(m);continue;}const f=byName.get('media-'+m.id);if(!f)continue;say('사진·동영상 받는 중: '+(j.title||''));const blob=await (await gdl(f.id)).blob();blobs.push({id:m.id,trip:id,type:m.type,name:m.name||'',blob:new Blob([blob],{type:m.type})});keep.push(m);}
     j.media=keep;const gone=local?(local.media||[]).filter(m=>!keep.some(k=>k.id===m.id)):[];await tx(['trips','media'],'readwrite',x=>{blobs.forEach(b=>x.objectStore('media').put(b));gone.forEach(m=>x.objectStore('media').delete(m.id));x.objectStore('trips').put(j);});st.down++;delete tomb[id];lsSet('tomb',tomb);}}
+  {const wf=byName.get('wish.json');const lw=lsGet('wishT','');const rw=wf&&wf.appProperties&&wf.appProperties.updated||'';if(wf&&rw>lw){const j=await (await gdl(wf.id)).json();if(j&&Array.isArray(j.wish)){WISH=j.wish.filter(c=>CNAME[c]);lsSet('wish',WISH);lsSet('wishT',rw);}}else if(lw&&(!wf||lw>rw)){await upload(folder,'wish.json',new Blob([JSON.stringify({wish:WISH,updated:lw})],{type:'application/json'}),{updated:lw},wf?wf.id:undefined);}}
   await reload();lsSet('last',new Date().toISOString());say('동기화 완료 · 올림 '+st.up+' · 받음 '+st.down+(st.del?' · 삭제 반영 '+st.del:'')+' ('+new Date().toLocaleTimeString('ko-KR')+')');
  }catch(e){say(e.message==='NEEDLOGIN'?'로그인이 필요해요. 「지금 동기화」를 눌러 주세요.':'동기화 실패: '+(e.message||e));}
  finally{SYNC.busy=false;SYNC.ui=false;syncUi();}}
@@ -251,8 +257,32 @@ function syncUi(){const on=!!lsGet('linked',0);$('#syncBtn').textContent=on?'지
 $('#syncBtn').onclick=()=>syncNow(true);
 $('#unlinkBtn').onclick=()=>{if(!confirm('이 기기의 드라이브 연결을 끊을까요? 드라이브에 올린 파일과 이 기기의 기록은 그대로 남아요.'))return;try{if(SYNC.token&&window.google?.accounts?.oauth2)google.accounts.oauth2.revoke(SYNC.token,()=>{});}catch(e){}SYNC.token='';SYNC.exp=0;SYNC.folder='';lsSet('linked',0);lsSet('folder','');$('#syncMsg').textContent='연결을 끊었어요.';syncUi();};
 syncUi();
+// ---------- summary ----------
+function renderSummary(){const sel=$('#sumYear');const years=[...new Set(TRIPS.map(t=>t.start.slice(0,4)))].sort().reverse();const keep=sel.value;sel.innerHTML='<option value="">전체 기간</option>'+years.map(y=>'<option>'+y+'</option>').join('');sel.value=years.includes(keep)?keep:'';
+ const y=sel.value,ts=TRIPS.filter(t=>!y||t.start.startsWith(y)),out=$('#sumOut');
+ if(!ts.length){out.innerHTML='<div class="card empty">'+(TRIPS.length?'이 기간에는 기록이 없어요.':'아직 기록이 없어요. 첫 여행을 남기면 요약이 만들어져요.')+'</div>';return;}
+ const days=new Set(),cs=new Map(),rs=new Set(),th=new Map(),mo=Array(12).fill(0);let media=0,videos=0,longest=null;
+ for(const t of ts){const td=tripDays(t).filter(d=>!y||d.startsWith(y));td.forEach(d=>days.add(d));(t.countries||[]).forEach(c=>cs.set(c,(cs.get(c)||0)+1));(t.regions||[]).forEach(r=>rs.add(r));(t.themes||[]).forEach(x=>th.set(x,(th.get(x)||0)+1));mo[+t.start.slice(5,7)-1]++;(t.media||[]).forEach(m=>{media++;if(m.type.startsWith('video'))videos++;});const len=tripDays(t).length;if(!longest||len>longest.len)longest={t,len};}
+ const sorted=[...cs.entries()].sort((a,b)=>b[1]-a[1]||(CNAME[a[0]]||a[0]).localeCompare(CNAME[b[0]]||b[0],'ko'));const top=[...th.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6);const mx=Math.max(1,...mo);const byDate=[...ts].sort((a,b)=>a.start.localeCompare(b.start));
+ out.innerHTML='<div class="stats"><div class="stat"><b>'+ts.length+'</b><span>여행</span></div><div class="stat"><b>'+days.size+'</b><span>여행한 날</span></div><div class="stat"><b>'+cs.size+'</b><span>다녀온 나라</span></div><div class="stat"><b>'+rs.size+'/17</b><span>국내 시·도</span></div><div class="stat"><b>'+(media-videos)+'</b><span>사진</span></div><div class="stat"><b>'+videos+'</b><span>동영상</span></div></div>'+
+ '<div class="card"><h3 style="margin:0 0 8px;font-size:16px">'+(y?y+'년 ':'')+'다녀온 나라</h3><div class="chips">'+sorted.map(([c,n])=>'<span class="chip">'+FLAG(c)+' '+esc(CNAME[c]||c)+' · '+n+'번</span>').join('')+'</div></div>'+
+ '<div class="card"><h3 style="margin:0 0 8px;font-size:16px">월별 여행 횟수</h3><div class="sumbar">'+mo.map((n,i)=>'<div><i style="height:'+Math.round(n/mx*80)+'px"></i>'+(n||'')+'<br>'+(i+1)+'월</div>').join('')+'</div></div>'+
+ (top.length?'<div class="card"><h3 style="margin:0 0 8px;font-size:16px">자주 쓴 주제</h3><div class="chips">'+top.map(([x,n])=>'<span class="chip">#'+esc(x)+' · '+n+'</span>').join('')+'</div></div>':'')+
+ '<div class="card"><h3 style="margin:0 0 8px;font-size:16px">하이라이트</h3><div class="hl">🏆 가장 길었던 여행: <b>'+esc(longest.t.title)+'</b> ('+longest.len+'일)</div><div class="hl">🌅 첫 여행: <b>'+esc(byDate[0].title)+'</b> ('+fmtD(byDate[0].start)+')</div><div class="hl">🌇 마지막 여행: <b>'+esc(byDate.at(-1).title)+'</b> ('+fmtD(byDate.at(-1).start)+')</div>'+(sorted[0]?'<div class="hl">❤️ 가장 많이 간 나라: <b>'+FLAG(sorted[0][0])+' '+esc(CNAME[sorted[0][0]]||sorted[0][0])+'</b> ('+sorted[0][1]+'번)</div>':'')+'</div>';}
+$('#sumYear').addEventListener('change',renderSummary);
+// ---------- wishlist ----------
+function saveWish(){lsSet('wish',WISH);lsSet('wishT',new Date().toISOString());renderMap();autoSync();}
+function toggleWish(c){WISH=WISH.includes(c)?WISH.filter(x=>x!==c):[...WISH,c];saveWish();}
+function renderWish(){const el=$('#wList');if(!el)return;el.innerHTML=WISH.length?WISH.map(c=>'<span class="chip">'+FLAG(c)+' '+esc(CNAME[c]||c)+(VISIT[c]?' ✔ 다녀옴':'')+'<button type="button" data-wr="'+c+'" aria-label="'+esc(CNAME[c]||c)+' 빼기">✕</button></span>').join(''):'<span class="muted">지도에서 안 가본 나라를 누르거나 위에서 추가해 보세요.</span>';$$('[data-wr]').forEach(b=>b.onclick=()=>toggleWish(b.dataset.wr));}
+function addWish(){const v=$('#wIn').value.trim();if(!v)return;const c=COUNTRIES.find(x=>!x.code.startsWith('AREA')&&(x.name===v||x.en.toLowerCase()===v.toLowerCase()))||COUNTRIES.find(x=>!x.code.startsWith('AREA')&&x.name.includes(v));$('#wIn').value='';if(!c){$('#wIn').placeholder='찾을 수 없어요. 다른 이름으로 입력해 보세요.';return;}if(!WISH.includes(c.code)){WISH=[...WISH,c.code];saveWish();}}
+$('#wAdd').onclick=addWish;$('#wIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addWish();}});
+// ---------- install (PWA) ----------
+let DEFERRED=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DEFERRED=e;$('#pwaBtn').classList.remove('hide');});
+$('#pwaBtn').onclick=async()=>{if(!DEFERRED)return;DEFERRED.prompt();try{await DEFERRED.userChoice;}catch(e){}DEFERRED=null;$('#pwaBtn').classList.add('hide');};
+(()=>{const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;$('#pwaTxt').textContent=standalone?'이미 앱으로 열려 있어요. 한 번 열어 본 화면은 인터넷이 없어도 열려요. 구글 드라이브 동기화는 인터넷이 필요해요.':/iphone|ipad/i.test(navigator.userAgent)?'사파리에서 「앱 화면만 따로 열기」를 연 뒤, 공유 버튼 → 「홈 화면에 추가」를 눌러 주세요.':'아래 「앱 화면만 따로 열기」로 연 화면에서 「홈 화면에 추가」 버튼이 보이면 눌러 주세요. 안 보이면 브라우저 메뉴의 「앱 설치」나 「홈 화면에 추가」를 쓰면 돼요. 허브 안의 화면에서는 설치가 안 될 수 있어요.';
+ if('serviceWorker' in navigator&&location.protocol==='https:'&&!window.FP_DBNAME)navigator.serviceWorker.register('footprints-sw.js').catch(()=>{});})();
 // ---------- init ----------
 async function reload(){TRIPS=(await allTrips()).sort((a,b)=>b.start.localeCompare(a.start));fillFilters();renderMap();if(!$('#v-list').classList.contains('hide'))renderList();}
-(async()=>{$('#countryList').innerHTML=COUNTRIES.filter(c=>!c.code.startsWith('AREA')).map(c=>'<option value="'+esc(c.name)+'">'+esc(c.en)+'</option>').join('');buildMap();try{mapMode(localStorage.getItem('fp-mapmode')==='kr'?'kr':'world');}catch(e){}try{DB=await openDB();await reload();}catch(e){document.querySelector('main').insertAdjacentHTML('afterbegin','<div class="card" style="color:#c0392b">이 브라우저에서는 저장소를 열 수 없어요(시크릿 모드 등). '+esc(e.message||e)+'</div>');}})();
+(async()=>{$('#countryList').innerHTML=COUNTRIES.filter(c=>!c.code.startsWith('AREA')).map(c=>'<option value="'+esc(c.name)+'">'+esc(c.en)+'</option>').join('');WISH=lsGet('wish',[]).filter(c=>CNAME[c]);buildMap();try{mapMode(localStorage.getItem('fp-mapmode')==='kr'?'kr':'world');}catch(e){}try{DB=await openDB();await reload();}catch(e){document.querySelector('main').insertAdjacentHTML('afterbegin','<div class="card" style="color:#c0392b">이 브라우저에서는 저장소를 열 수 없어요(시크릿 모드 등). '+esc(e.message||e)+'</div>');}})();
 window.go=go;
 </script></body></html>

@@ -1,0 +1,25 @@
+{
+ "name": "여행 발자취",
+ "short_name": "여행 발자취",
+ "description": "여행 기록과 세계 지도",
+ "start_url": "./footprints.html",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#fff8f3",
+ "theme_color": "#f07a9b",
+ "lang": "ko",
+ "icons": [
+  {
+   "src": "footprints-icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any maskable"
+  },
+  {
+   "src": "footprints-icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}
